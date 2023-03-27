@@ -1,15 +1,20 @@
 package main
 
 import (
-	"net/http"
-	
-	"github.com/labstack/echo/v4"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/oliverflum/faboulous/utils"
 )
 
 func main() {
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+	app := fiber.New()
+
+	utils.InitDB()
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
 	})
-	e.Logger.Fatal(e.Start(":1323"))
+
+	log.Fatal(app.Listen(":3000"))
 }
