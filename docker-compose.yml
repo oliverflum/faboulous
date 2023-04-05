@@ -3,18 +3,31 @@ services:
   app:
     build:
       dockerfile: Dockerfile
-      context: ./src
+      context: .
+    container_name: fabolous
+    ports: 
+      - 3000:3000
+    depends_on: 
+      - db
+    environment:
+      - FAB_DB_USER_NAME=${MYSQL_USER}
+      - FAB_DB_PASSWORD=${MYSQL_PASSWORD}
+      - FAB_DB_DB_NAME=${MYSQL_DATABASE}
+      - FAB_DB_PORT=3306
+      - FAB_DB_HOST_NAME=fabolous_db
   db:
     image: mysql:8.0.27
     container_name: fabolous_db
     restart: always
+    expose: 
+      - 3306
     ports:
       - 3306:3306
     volumes:
       - ./mysql/data:/data
     environment:
       - TZ=Europe/Berlin
-      - MYSQL_USER
-      - MYSQL_PASSWORD
-      - MYSQL_DATABASE
-      - MYSQL_ROOT_PASSWORD
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}

@@ -26,6 +26,6 @@ func (self valueType) Value() (driver.Value, error) {
 
 type Feature struct {
 	gorm.Model
-	Name      string
-	ValueType valueType `sql:"type:ENUM('BOOL', 'STRING', 'INT', 'FLOAT')" gorm:"column:car_type"`
+	Name      string    `json:"name" validate:"required"`
+	ValueType valueType `gorm:"type:enum('BOOL', 'STRING', 'INT', 'FLOAT');column:value_type" json:"value_type" validate:"required"`
 }
