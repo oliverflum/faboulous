@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   app:
     build:
@@ -17,6 +16,7 @@ services:
       - FAB_DB_HOST_NAME=fabolous_db
   db:
     image: mysql:8.0.27
+    platform: linux/amd64
     container_name: fabolous_db
     restart: always
     expose: 

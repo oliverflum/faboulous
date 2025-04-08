@@ -16,10 +16,20 @@ func main() {
 	api := app.Group("/api")
 
 	configApi := api.Group("/config")
-	configApi.Get("/feature", handler.ListFeatures)
-	configApi.Post("/feature", handler.AddFeature)
-	configApi.Get("/feature/:id", handler.GetFeature)
-	configApi.Delete("/feature/:id", handler.DeleteFeature)
+
+	featureApi := configApi.Group("/feature")
+	featureApi.Get("/", handler.ListFeatures)
+	featureApi.Post("/", handler.AddFeature)
+	featureApi.Put("/:id", handler.UpdateFeature)
+	featureApi.Get("/:id", handler.GetFeature)
+	featureApi.Delete("/:id", handler.DeleteFeature)
+
+	// testApi := configApi.Group("/test")
+	// testApi.Get("/", handler.ListFeatures)
+	// testApi.Post("/", handler.AddFeature)
+	// testApi.Put("/", handler.AddFeature)
+	// testApi.Get("/:id", handler.GetFeature)
+	// testApi.Delete("/:id", handler.DeleteFeature)
 
 	log.Fatal(app.Listen(":3000"))
 }
