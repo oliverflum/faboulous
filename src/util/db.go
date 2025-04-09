@@ -24,7 +24,7 @@ func InitSqliteDB() *gorm.DB {
 		panic("Failed to connect database")
 	}
 	dbConnection = db
-	dbConnection.AutoMigrate(&model.Feature{}, &model.Test{})
+	dbConnection.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{})
 	return dbConnection
 }
 
@@ -50,7 +50,7 @@ func InitMysqlDB() *gorm.DB {
 		panic("Failed to connect database")
 	}
 	dbConnection = db
-	dbConnection.AutoMigrate(&model.Feature{}, &model.Test{})
+	dbConnection.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{})
 	return dbConnection
 }
 
@@ -67,7 +67,7 @@ func InitDB() *gorm.DB {
 	} else {
 		panic("Invalid database type. Supported types are: sqlite, mysql")
 	}
-	db.AutoMigrate(&model.Feature{}, &model.Test{}, &model.Variant{}, &model.FeatureVariantValue{})
+	db.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{}, &model.VariantEntity{}, &model.VariantFeatureEntity{})
 	return db
 }
 
