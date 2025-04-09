@@ -1,43 +1,31 @@
 package model
 
 import (
-	"database/sql/driver"
 	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
 )
 
-type ValueType string
-
 const (
-	BOOL   ValueType = "BOOL"
-	STRING ValueType = "STRING"
-	INT    ValueType = "INT"
-	FLOAT  ValueType = "FLOAT"
+	BOOL   = "BOOL"
+	STRING = "STRING"
+	INT    = "INT"
+	FLOAT  = "FLOAT"
 )
-
-func (self *ValueType) Scan(value interface{}) error {
-	*self = ValueType(value.([]byte))
-	return nil
-}
-
-func (self ValueType) Value() (driver.Value, error) {
-	return string(self), nil
-}
 
 type FeatureEntity struct {
 	gorm.Model
-	Name         string    `gorm:"not null"`
-	Type         ValueType `gorm:"not null"`
-	DefaultValue string    `gorm:"not null"`
+	Name         string `gorm:"not null"`
+	Type         string `gorm:"not null"`
+	DefaultValue string `gorm:"not null"`
 }
 
 func (feature *FeatureEntity) TableName() string {
 	return "features"
 }
 
-func getEntityValueAndType(value any) (ValueType, string, error) {
+func getEntityValueAndType(value any) (string, string, error) {
 	switch v := value.(type) {
 	case bool:
 		return BOOL, fmt.Sprintf("%t", v), nil
@@ -69,7 +57,7 @@ type FeaturePayload struct {
 	Value any    `json:"value" validate:"required"`
 }
 
-func getPayloadValue(value string, valueType ValueType) (any, error) {
+func getPayloadValue(value string, valueType string) (any, error) {
 	switch valueType {
 	case BOOL:
 		return value == "true", nil

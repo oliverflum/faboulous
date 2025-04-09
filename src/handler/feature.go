@@ -45,7 +45,7 @@ func AddFeature(c *fiber.Ctx) error {
 		return c.Status(400).SendString(err.Error())
 	}
 
-	result := util.GetDB().Create(feature)
+	result := util.GetDB().Create(&feature)
 
 	if result.Error != nil || result.RowsAffected == 0 {
 		return c.Status(500).Send(nil)
