@@ -35,5 +35,6 @@ func main() {
 	variantApi.Post("/", handler.AddVariant)
 	variantApi.Put("/:id", handler.UpdateVariant)
 	variantApi.Delete("/:id", handler.DeleteVariant)
+
 	log.Fatal(app.Listen(":3000"))
 }

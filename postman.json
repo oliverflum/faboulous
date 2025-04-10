@@ -1,0 +1,231 @@
+{
+    "info": {
+        "name": "Faboulous API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Features",
+            "item": [
+                {
+                    "name": "List Features",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/feature",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "feature"]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Feature",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/feature",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "feature"]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "name": "color",
+                                "value": "blue"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Feature",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/feature/:id",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "feature", ":id"],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "name": "color",
+                                "value": "red"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tests",
+            "item": [
+                {
+                    "name": "Add Test",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/test",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "test"]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "id": 0,
+                                "name": "Button Color Test",
+                                "active": true,
+                                "method": "RANDOM",
+                                "variants": []
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Test",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/test/:id",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "test", ":id"],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "id": 1,
+                                "name": "Button Color Test",
+                                "active": false,
+                                "method": "HASH",
+                                "variants": []
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Variants",
+            "item": [
+                {
+                    "name": "Add Variant",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/test/:testId/variant",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "test", ":testId", "variant"],
+                            "variable": [
+                                {
+                                    "key": "testId",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "id": 0,
+                                "name": "Blue Button",
+                                "features": [
+                                    {
+                                        "name": "color",
+                                        "value": "blue"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Variant",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{base_url}}/api/config/test/:testId/variant/:id",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "config", "test", ":testId", "variant", ":id"],
+                            "variable": [
+                                {
+                                    "key": "testId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "id",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "json",
+                            "json": {
+                                "id": 1,
+                                "name": "Red Button",
+                                "features": [
+                                    {
+                                        "name": "color",
+                                        "value": "red"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ]
+}
