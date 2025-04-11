@@ -4,34 +4,27 @@ import (
 	"gorm.io/gorm"
 )
 
-type VariantEntity struct {
+type Variant struct {
 	gorm.Model
-	Name     string `gorm:"unique;not null"`
-	Test     TestEntity
-	TestID   uint
-	Features []FeatureEntity `gorm:"many2many:variant_features;"`
+	Name     string `gorm:"not null;primary_key"`
+	Test     Test
+	TestID   uint      `gorm:"not null;primary_key"`
+	Features []Feature `gorm:"many2many:variant_features;foreignKey:ID;joinForeignKey:VariantID;References:ID;joinReferences:FeatureID"`
 }
 
-func (variant *VariantEntity) TableName() string {
-	return "variant"
+func (variant *Variant) UpdateFromPayload(payload VariantPayload) error {
+	variant.Name = payload.Name
+	return nil
 }
 
-func NewVariantEntity(payload VariantPayload) VariantEntity {
-	features := make([]FeatureEntity, len(payload.Features))
-	for i, feature := range payload.Features {
-		entity, err := NewFeatureEntity(feature)
-		if err != nil {
-			panic("Could not convert feature payload to entity: " + err.Error())
-		}
-		features[i] = entity
-	}
-	return VariantEntity{
+func NewVariantEntity(payload VariantPayload) Variant {
+	return Variant{
 		Name:     payload.Name,
-		Features: features,
+		Features: make([]Feature, 0),
 	}
 }
 
-func NewVariantPayload(entity VariantEntity) VariantPayload {
+func NewVariantPayload(entity Variant) VariantPayload {
 	features := make([]FeaturePayload, len(entity.Features))
 	for i, feature := range entity.Features {
 		payload, err := NewFeaturePayload(feature)
@@ -50,5 +43,5 @@ func NewVariantPayload(entity VariantEntity) VariantPayload {
 type VariantPayload struct {
 	Id       uint             `json:"id"`
 	Name     string           `json:"name" validate:"required"`
-	Features []FeaturePayload `json:"features" validate:"required"`
+	Features []FeaturePayload `json:"features"`
 }

@@ -2,146 +2,190 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/oliverflum/faboulous/db"
 	"github.com/oliverflum/faboulous/model"
 	"github.com/oliverflum/faboulous/util"
+	"gorm.io/gorm"
 )
 
-func ListVariants(c *fiber.Ctx) error {
-	testID := c.Params("testId")
-	if testID == "" {
-		return c.Status(400).SendString("Test ID is required")
+func updateVariantFeatureValue(tx *gorm.DB, variant *model.Variant, feature *model.FeaturePayload, value any) error {
+
+	var existingFeature model.Feature
+	res := tx.First(&existingFeature, "name = ?", feature.Name)
+	if res.Error != nil {
+		return util.HandleGormError(res.Error)
 	}
 
-	var variants []model.VariantEntity
-	result := util.GetDB().Where("test_id = ?", testID).Find(&variants)
+	valueType, stringValue, err := model.GetEntityValueAndType(value)
+	if err != nil {
+		return err
+	}
+
+	if existingFeature.Type != valueType {
+		return util.FabolousError{
+			Code:    fiber.StatusBadRequest,
+			Message: "value type mismatch: " + existingFeature.Type + " != " + valueType,
+		}
+	}
+
+	var variantFeature *model.VariantFeature
+	res = tx.Find(&variantFeature, "variant_id = ? AND feature_id = ?", variant.ID, existingFeature.ID)
+	if res.RowsAffected == 0 {
+		variantFeature = new(model.VariantFeature)
+		variantFeature.FeatureID = existingFeature.ID
+		variantFeature.VariantID = variant.ID
+	}
+
+	variantFeature.Value = stringValue
+
+	result := tx.Save(&variantFeature)
 	if result.Error != nil {
-		return c.Status(500).SendString(result.Error.Error())
+		return result.Error
 	}
-
-	// Convert entities to payloads
-	variantPayloads := make([]model.VariantPayload, len(variants))
-	for i, variant := range variants {
-		variantPayloads[i] = model.NewVariantPayload(variant)
-	}
-
-	return c.Status(200).JSON(variantPayloads)
+	return nil
 }
 
 func AddVariant(c *fiber.Ctx) error {
 	testID := c.Params("testId")
 	if testID == "" {
-		return c.Status(400).SendString("Test ID is required")
+		return c.Status(fiber.StatusBadRequest).SendString("Test ID is required")
 	}
 
 	var payload model.VariantPayload
 	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(400).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	// Validate the payload
 	errors := util.ValidateStruct(payload)
 	if len(errors) > 0 {
-		return c.Status(400).JSON(errors)
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	// Check if test exists
-	var test model.TestEntity
-	result := util.GetDB().First(&test, testID)
+	var test model.Test
+	result := db.GetDB().First(&test, testID)
 	if result.RowsAffected == 0 {
-		return c.Status(404).SendString("Test not found")
+		return c.Status(fiber.StatusNotFound).SendString("Test not found")
 	}
 
 	// Check if variant with same name already exists for this test
-	var existingVariant model.VariantEntity
-	result = util.GetDB().Where("name = ? AND test_id = ?", payload.Name, testID).First(&existingVariant)
+	var existingVariant model.Variant
+	result = db.GetDB().Where("name = ? AND test_id = ?", payload.Name, testID).First(&existingVariant)
 	if result.RowsAffected > 0 {
-		return c.Status(400).SendString("Variant with this name already exists for this test")
+		return c.Status(fiber.StatusBadRequest).SendString("Variant with this name already exists for this test")
 	}
 
 	variant := model.NewVariantEntity(payload)
-	variant.TestID = test.ID
 
-	result = util.GetDB().Create(&variant)
-	if result.Error != nil {
-		return c.Status(500).SendString(result.Error.Error())
+	err := db.GetDB().Transaction(func(tx *gorm.DB) error {
+		variant.TestID = test.ID
+
+		result = tx.Create(&variant)
+		if result.Error != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+		}
+
+		for _, feature := range payload.Features {
+			err := updateVariantFeatureValue(tx, &variant, &feature, feature.Value)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return util.SendErrorRes(c, err)
 	}
 
-	return c.Status(201).JSON(model.NewVariantPayload(variant))
+	// Load the variant with its features
+	result = db.GetDB().Preload("Features").First(&variant, variant.ID)
+	if result.Error != nil {
+		return util.SendErrorRes(c, result.Error)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(model.NewVariantPayload(variant))
 }
 
 func UpdateVariant(c *fiber.Ctx) error {
 	testID := c.Params("testId")
 	variantID := c.Params("id")
 	if testID == "" || variantID == "" {
-		return c.Status(400).SendString("Test ID and Variant ID are required")
+		return c.Status(fiber.StatusBadRequest).SendString("Test ID and Variant ID are required")
 	}
 
 	var payload model.VariantPayload
 	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(400).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	// Validate the payload
 	errors := util.ValidateStruct(payload)
 	if len(errors) > 0 {
-		return c.Status(400).JSON(errors)
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	// Check if variant exists and belongs to the test
-	var variant model.VariantEntity
-	result := util.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
+	var variant model.Variant
+	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
 	if result.RowsAffected == 0 {
-		return c.Status(404).SendString("Variant not found")
-	}
-
-	// Check if new name conflicts with existing variant
-	if payload.Name != variant.Name {
-		var existingVariant model.VariantEntity
-		result = util.GetDB().Where("name = ? AND test_id = ? AND id != ?", payload.Name, testID, variantID).First(&existingVariant)
-		if result.RowsAffected > 0 {
-			return c.Status(400).SendString("Variant with this name already exists for this test")
-		}
+		return c.Status(fiber.StatusNotFound).SendString("Variant not found")
 	}
 
 	// Update variant
-	variant.Name = payload.Name
+	err := variant.UpdateFromPayload(payload)
+	if err != nil {
+		return util.SendErrorRes(c, err)
+	}
 
-	// Convert feature payloads to entities
-	variant.Features = make([]model.FeatureEntity, 0)
-	for _, featurePayload := range payload.Features {
-		featureEntity, err := model.NewFeatureEntity(featurePayload)
-		if err != nil {
-			return c.Status(400).SendString("Invalid feature: " + err.Error())
+	err = db.GetDB().Transaction(func(tx *gorm.DB) error {
+		result = tx.Save(&variant)
+		if result.Error != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
 		}
-		variant.Features = append(variant.Features, featureEntity)
+
+		for _, feature := range payload.Features {
+			err := updateVariantFeatureValue(tx, &variant, &feature, feature.Value)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return util.SendErrorRes(c, err)
 	}
 
-	result = util.GetDB().Save(&variant)
+	// Load the variant with its features
+	result = db.GetDB().Preload("Features").First(&variant, variant.ID)
 	if result.Error != nil {
-		return c.Status(500).SendString(result.Error.Error())
+		return util.SendErrorRes(c, result.Error)
 	}
 
-	return c.Status(200).JSON(model.NewVariantPayload(variant))
+	return c.Status(fiber.StatusOK).JSON(model.NewVariantPayload(variant))
 }
 
 func DeleteVariant(c *fiber.Ctx) error {
 	testID := c.Params("testId")
 	variantID := c.Params("id")
 	if testID == "" || variantID == "" {
-		return c.Status(400).SendString("Test ID and Variant ID are required")
+		return c.Status(fiber.StatusBadRequest).SendString("Test ID and Variant ID are required")
 	}
 
 	// Check if variant exists and belongs to the test
-	var variant model.VariantEntity
-	result := util.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
+	var variant model.Variant
+	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
 	if result.RowsAffected == 0 {
-		return c.Status(404).SendString("Variant not found")
+		return c.Status(fiber.StatusNotFound).SendString("Variant not found")
 	}
 
-	result = util.GetDB().Delete(&variant)
+	result = db.GetDB().Delete(&variant)
 	if result.Error != nil {
-		return c.Status(500).SendString(result.Error.Error())
+		return util.SendErrorRes(c, util.HandleGormError(result.Error))
 	}
 
-	return c.Status(204).Send(nil)
+	return c.Status(fiber.StatusNoContent).Send(nil)
 }

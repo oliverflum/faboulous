@@ -6,29 +6,33 @@ import (
 	"gorm.io/gorm"
 )
 
-type VariantFeatureEntity struct {
+type VariantFeature struct {
 	gorm.Model
-	FeatureID uint
-	Type      string
+	FeatureID uint    `gorm:"primaryKey"`
+	VariantID uint    `gorm:"primaryKey"`
+	Feature   Feature `gorm:"foreignKey:FeatureID"`
 	Value     string
 }
 
-func (variantFeature *VariantFeatureEntity) TableName() string {
-	return "variant_features"
-}
-
-func (variantFeature *VariantFeatureEntity) SetValue(value any) error {
-	valueType, stringValue, err := getEntityValueAndType(value)
+func (variantFeature *VariantFeature) SetValue(value any) error {
+	valueType, stringValue, err := GetEntityValueAndType(value)
 	if err != nil {
 		return fmt.Errorf("could not set variant feature value: %w", err)
 	}
-	variantFeature.Type = valueType
+
+	// Access the linked variant
+	if variantFeature.Feature.ID == 0 || variantFeature.Feature.Type != valueType {
+		return fmt.Errorf("assigns invalid value type to feature: %w", err)
+	}
 	variantFeature.Value = stringValue
 	return nil
 }
 
-func (variantFeature *VariantFeatureEntity) GetValue() (any, error) {
-	value, err := getPayloadValue(variantFeature.Value, variantFeature.Type)
+func (variantFeature *VariantFeature) GetValue() (any, error) {
+	if variantFeature.Feature.ID == 0 {
+		return nil, fmt.Errorf("feature not found")
+	}
+	value, err := GetPayloadValue(variantFeature.Value, variantFeature.Feature.Type)
 	if err != nil {
 		return nil, fmt.Errorf("could not get variant feature value: %w", err)
 	}

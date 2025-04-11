@@ -5,8 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/oliverflum/faboulous/db"
 	"github.com/oliverflum/faboulous/handler"
-	"github.com/oliverflum/faboulous/util"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	log.SetLevel(log.LevelTrace)
 	app.Use(logger.New())
 
-	util.InitDB()
+	db.InitDB()
 
 	api := app.Group("/api")
 
@@ -30,7 +30,7 @@ func main() {
 	testApi := configApi.Group("/test")
 	testApi.Get("/", handler.ListTests)
 	testApi.Post("/", handler.AddTest)
-	testApi.Put("/", handler.UpdateTest)
+	testApi.Put("/:id", handler.UpdateTest)
 	testApi.Get("/:id", handler.GetTest)
 	testApi.Delete("/:id", handler.DeleteTest)
 

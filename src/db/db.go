@@ -1,9 +1,10 @@
-package util
+package db
 
 import (
 	"fmt"
 
 	"github.com/oliverflum/faboulous/model"
+	"github.com/oliverflum/faboulous/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -34,7 +35,7 @@ func InitMysqlDB() *gorm.DB {
 		portEnvVar,
 		dbNameVar,
 	}
-	envVarVals := ReadEnvVars(envVarNames)
+	envVarVals := util.ReadEnvVars(envVarNames)
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		envVarVals[userNameEnvVar],
@@ -54,7 +55,7 @@ func InitDB() *gorm.DB {
 	envTypeVarNameArr := []string{
 		dbTypeVar,
 	}
-	dbType := ReadEnvVars(envTypeVarNameArr)[dbTypeVar]
+	dbType := util.ReadEnvVars(envTypeVarNameArr)[dbTypeVar]
 	var db *gorm.DB
 	if dbType == "sqlite" {
 		db = InitSqliteDB()
@@ -63,7 +64,7 @@ func InitDB() *gorm.DB {
 	} else {
 		panic("Invalid database type. Supported types are: sqlite, mysql")
 	}
-	db.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{}, &model.VariantEntity{}, &model.VariantFeatureEntity{})
+	db.AutoMigrate(&model.Feature{}, &model.Test{}, &model.Variant{}, &model.VariantFeature{})
 	return db
 }
 
