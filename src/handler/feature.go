@@ -9,10 +9,12 @@ import (
 func ListFeatures(c *fiber.Ctx) error {
 	var features []model.FeatureEntity
 
-	util.GetDB().Find(&features)
+	if err := util.GetDB().Find(&features).Error; err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
 
 	if len(features) == 0 {
-		return c.Status(200).JSON(&features)
+		return c.Status(200).JSON([]model.FeaturePayload{})
 	}
 
 	// Convert the features to FeaturePayload
@@ -24,7 +26,7 @@ func ListFeatures(c *fiber.Ctx) error {
 		}
 		featurePayloads[i] = featurePayload
 	}
-	return c.Status(200).JSON(&featurePayloads)
+	return c.Status(200).JSON(featurePayloads)
 }
 
 func AddFeature(c *fiber.Ctx) error {
@@ -38,6 +40,12 @@ func AddFeature(c *fiber.Ctx) error {
 	if len(errors) > 0 {
 		return c.Status(400).JSON(errors)
 	}
+	// Check if feature with same name already exists
+	var existingFeature model.FeatureEntity
+	result := util.GetDB().Where("name = ?", featurePayload.Name).First(&existingFeature)
+	if result.RowsAffected > 0 {
+		return c.Status(400).SendString("Feature with this name already exists")
+	}
 
 	feature, err := model.NewFeatureEntity(*featurePayload)
 
@@ -45,12 +53,17 @@ func AddFeature(c *fiber.Ctx) error {
 		return c.Status(400).SendString(err.Error())
 	}
 
-	result := util.GetDB().Create(&feature)
+	result = util.GetDB().Create(&feature)
 
 	if result.Error != nil || result.RowsAffected == 0 {
 		return c.Status(500).Send(nil)
 	}
-	return c.Status(200).JSON(feature)
+
+	resBody, err := model.NewFeaturePayload(feature)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+	return c.Status(200).JSON(resBody)
 }
 
 func GetFeature(c *fiber.Ctx) error {

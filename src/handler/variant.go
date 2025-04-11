@@ -105,7 +105,16 @@ func UpdateVariant(c *fiber.Ctx) error {
 
 	// Update variant
 	variant.Name = payload.Name
-	variant.Features = payload.Features
+
+	// Convert feature payloads to entities
+	variant.Features = make([]model.FeatureEntity, 0)
+	for _, featurePayload := range payload.Features {
+		featureEntity, err := model.NewFeatureEntity(featurePayload)
+		if err != nil {
+			return c.Status(400).SendString("Invalid feature: " + err.Error())
+		}
+		variant.Features = append(variant.Features, featureEntity)
+	}
 
 	result = util.GetDB().Save(&variant)
 	if result.Error != nil {

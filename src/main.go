@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/handler"
@@ -10,6 +11,8 @@ import (
 
 func main() {
 	app := fiber.New()
+	log.SetLevel(log.LevelTrace)
+	app.Use(logger.New())
 
 	util.InitDB()
 
@@ -25,13 +28,13 @@ func main() {
 	featureApi.Delete("/:id", handler.DeleteFeature)
 
 	testApi := configApi.Group("/test")
-	testApi.Get("/", handler.ListFeatures)
-	testApi.Post("/", handler.AddFeature)
-	testApi.Put("/", handler.AddFeature)
-	testApi.Get("/:id", handler.GetFeature)
-	testApi.Delete("/:id", handler.DeleteFeature)
+	testApi.Get("/", handler.ListTests)
+	testApi.Post("/", handler.AddTest)
+	testApi.Put("/", handler.UpdateTest)
+	testApi.Get("/:id", handler.GetTest)
+	testApi.Delete("/:id", handler.DeleteTest)
 
-	variantApi := testApi.Group("/variant")
+	variantApi := testApi.Group(":testId/variant")
 	variantApi.Post("/", handler.AddVariant)
 	variantApi.Put("/:id", handler.UpdateVariant)
 	variantApi.Delete("/:id", handler.DeleteVariant)

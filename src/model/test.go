@@ -11,10 +11,10 @@ const (
 
 type TestEntity struct {
 	gorm.Model
-	Name     string `gorm:"unique;not null"`
-	Active   bool   `gorm:"default:false"`
-	Method   string `gorm:"not null"`
-	Variants []VariantEntity
+	Name     string          `gorm:"unique;not null"`
+	Active   bool            `gorm:"default:false"`
+	Method   string          `gorm:"not null"`
+	Variants []VariantEntity `gorm:"foreignKey:TestID"`
 }
 
 func NewTestEntity(payload TestPayload) TestEntity {
@@ -27,11 +27,11 @@ func NewTestEntity(payload TestPayload) TestEntity {
 }
 
 type TestPayload struct {
-	Id       uint             `json:"id" validate:"required"`
+	Id       uint             `json:"id"`
 	Name     string           `json:"name" validate:"required"`
-	Active   bool             `json:"active" validate:"required"`
-	Method   string           `json:"method" validate:"required, oneof HASH RANDOM"`
-	Variants []VariantPayload `json:"variants" validate:"optional"`
+	Active   bool             `json:"active"`
+	Method   string           `json:"method" validate:"required,oneof=HASH RANDOM"`
+	Variants []VariantPayload `json:"variants"`
 }
 
 func NewTestPayload(entity TestEntity) TestPayload {

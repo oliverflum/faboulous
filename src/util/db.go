@@ -23,9 +23,7 @@ func InitSqliteDB() *gorm.DB {
 	if err != nil {
 		panic("Failed to connect database")
 	}
-	dbConnection = db
-	dbConnection.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{})
-	return dbConnection
+	return db
 }
 
 func InitMysqlDB() *gorm.DB {
@@ -49,9 +47,7 @@ func InitMysqlDB() *gorm.DB {
 	if err != nil {
 		panic("Failed to connect database")
 	}
-	dbConnection = db
-	dbConnection.AutoMigrate(&model.FeatureEntity{}, &model.TestEntity{})
-	return dbConnection
+	return db
 }
 
 func InitDB() *gorm.DB {
@@ -73,7 +69,7 @@ func InitDB() *gorm.DB {
 
 func GetDB() *gorm.DB {
 	if dbConnection == nil {
-		InitDB()
+		dbConnection = InitDB()
 	}
 	return dbConnection
 }

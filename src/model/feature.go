@@ -16,7 +16,7 @@ const (
 
 type FeatureEntity struct {
 	gorm.Model
-	Name         string `gorm:"not null"`
+	Name         string `gorm:"not null;unique"`
 	Type         string `gorm:"not null"`
 	DefaultValue string `gorm:"not null"`
 }

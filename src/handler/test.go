@@ -18,7 +18,11 @@ func ListTests(c *fiber.Ctx) error {
 		return c.Status(200).JSON(&tests)
 	}
 
-	return c.Status(200).JSON(&tests)
+	testPayloads := make([]model.TestPayload, len(tests))
+	for i, test := range tests {
+		testPayloads[i] = model.NewTestPayload(test)
+	}
+	return c.Status(200).JSON(&testPayloads)
 }
 
 func appendVariants(payload *model.TestPayload, test *model.TestEntity) error {
@@ -70,7 +74,7 @@ func GetTest(c *fiber.Ctx) error {
 		return c.SendStatus(404)
 	}
 
-	return c.Status(200).JSON(&test)
+	return c.Status(200).JSON(model.NewTestPayload(test))
 }
 
 func DeleteTest(c *fiber.Ctx) error {
