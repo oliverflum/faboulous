@@ -71,21 +71,29 @@ type FeaturePayload struct {
 }
 
 func GetPayloadValue(value string, valueType string) (any, error) {
+	conversionError := util.FabolousError{
+		Code:    fiber.StatusInternalServerError,
+		Message: "Invalid value for " + valueType + ": " + value,
+	}
 	switch valueType {
 	case BOOL:
-		return value == "true", nil
+		var boolValue bool
+		if _, err := fmt.Sscanf(value, "%t", &boolValue); err != nil {
+			return nil, conversionError
+		}
+		return boolValue, nil
 	case STRING:
 		return value, nil
 	case INT:
 		var intValue int
 		if _, err := fmt.Sscanf(value, "%d", &intValue); err != nil {
-			return nil, err
+			return nil, conversionError
 		}
 		return intValue, nil
 	case FLOAT:
 		var floatValue float64
 		if _, err := fmt.Sscanf(value, "%f", &floatValue); err != nil {
-			return nil, err
+			return nil, conversionError
 		}
 		return floatValue, nil
 	default:
