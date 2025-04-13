@@ -5,35 +5,8 @@ import (
 	"github.com/oliverflum/faboulous/backend/internal/db"
 	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
-	"gorm.io/gorm"
+	"github.com/oliverflum/faboulous/backend/service"
 )
-
-// sendTestResponse handles the common logic for sending test responses
-func sendTestResponse(c *fiber.Ctx, test *model.Test, statusCode int) error {
-	payload, err := model.NewTestPayload(test)
-	if err != nil {
-		return err
-	}
-	return c.Status(statusCode).JSON(payload)
-}
-
-// getTestByID retrieves a test by ID and returns an error if not found
-func getTestByID(id uint, preloadVariants bool) (*model.Test, error) {
-	var test model.Test
-	var result *gorm.DB
-	if preloadVariants {
-		result = db.GetDB().
-			Preload("Variants").
-			Preload("Variants.Features").
-			First(&test, id)
-	} else {
-		result = db.GetDB().First(&test, id)
-	}
-	if result.RowsAffected == 0 {
-		return nil, fiber.NewError(fiber.StatusNotFound, "Test not found")
-	}
-	return &test, nil
-}
 
 func ListTests(c *fiber.Ctx) error {
 	var tests []model.Test
@@ -74,7 +47,7 @@ func AddTest(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).Send(nil)
 	}
 
-	return sendTestResponse(c, &test, fiber.StatusCreated)
+	return service.SendTestResponse(c, &test, fiber.StatusCreated)
 }
 
 func GetTest(c *fiber.Ctx) error {
@@ -82,12 +55,12 @@ func GetTest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
-	test, err := getTestByID(testIDs["id"], true)
+	test, err := service.GetTestByID(testIDs["id"], true)
 	if err != nil {
 		return err
 	}
 
-	return sendTestResponse(c, test, fiber.StatusOK)
+	return service.SendTestResponse(c, test, fiber.StatusOK)
 }
 
 func DeleteTest(c *fiber.Ctx) error {
@@ -95,7 +68,7 @@ func DeleteTest(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
-	test, err := getTestByID(testIDs["id"], false)
+	test, err := service.GetTestByID(testIDs["id"], false)
 	if err != nil {
 		return err
 	}
@@ -120,7 +93,7 @@ func UpdateTest(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
 
-	test, err := getTestByID(testIDs["id"], true)
+	test, err := service.GetTestByID(testIDs["id"], true)
 	if err != nil {
 		return err
 	}
@@ -133,5 +106,5 @@ func UpdateTest(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
 	}
 
-	return sendTestResponse(c, test, fiber.StatusOK)
+	return service.SendTestResponse(c, test, fiber.StatusOK)
 }

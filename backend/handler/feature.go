@@ -5,33 +5,8 @@ import (
 	"github.com/oliverflum/faboulous/backend/internal/db"
 	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/service"
 )
-
-// sendFeatureResponse handles the common logic for sending feature responses
-func sendFeatureResponse(c *fiber.Ctx, feature *model.Feature, statusCode int) error {
-	featurePayload, err := model.NewFeaturePayload(feature)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
-	return c.Status(statusCode).JSON(featurePayload)
-}
-
-// checkFeatureExists checks if a feature exists by name and returns an error if it does
-func checkFeatureExists(name string) bool {
-	var existingFeature model.Feature
-	result := db.GetDB().Where("name = ?", name).First(&existingFeature)
-	return result.RowsAffected > 0
-}
-
-// getFeatureByID retrieves a feature by ID and returns an error if not found
-func getFeatureByID(id string) (*model.Feature, error) {
-	var feature model.Feature
-	result := db.GetDB().First(&feature, "id = ?", id)
-	if result.Error != nil {
-		return nil, util.HandleGormError(result.Error)
-	}
-	return &feature, nil
-}
 
 func ListFeatures(c *fiber.Ctx) error {
 	var features []*model.Feature
@@ -63,7 +38,7 @@ func AddFeature(c *fiber.Ctx) error {
 		return err
 	}
 
-	if checkFeatureExists(payload.Name) {
+	if service.CheckFeatureExists(payload.Name) {
 		return c.Status(fiber.StatusBadRequest).SendString("Feature with this name already exists")
 	}
 
@@ -77,20 +52,20 @@ func AddFeature(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).Send(nil)
 	}
 
-	return sendFeatureResponse(c, feature, fiber.StatusCreated)
+	return service.SendFeatureResponse(c, feature, fiber.StatusCreated)
 }
 
 func GetFeature(c *fiber.Ctx) error {
-	feature, err := getFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("id"))
 	if err != nil {
 		return err
 	}
 
-	return sendFeatureResponse(c, feature, fiber.StatusOK)
+	return service.SendFeatureResponse(c, feature, fiber.StatusOK)
 }
 
 func DeleteFeature(c *fiber.Ctx) error {
-	feature, err := getFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("id"))
 	if err != nil {
 		return err
 	}
@@ -110,7 +85,7 @@ func UpdateFeature(c *fiber.Ctx) error {
 		return err
 	}
 
-	feature, err := getFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("id"))
 	if err != nil {
 		return err
 	}
@@ -121,5 +96,5 @@ func UpdateFeature(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
 	}
 
-	return sendFeatureResponse(c, feature, fiber.StatusOK)
+	return service.SendFeatureResponse(c, feature, fiber.StatusOK)
 }

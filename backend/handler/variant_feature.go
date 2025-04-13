@@ -5,29 +5,8 @@ import (
 	"github.com/oliverflum/faboulous/backend/internal/db"
 	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/service"
 )
-
-func checkEntities(testID uint, variantID uint, featureName string) (*model.Variant, *model.Feature, *model.VariantFeature, error) {
-	var variant model.Variant
-	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
-	if result.Error != nil {
-		return nil, nil, nil, fiber.NewError(fiber.StatusNotFound, "Variant not found")
-	}
-
-	var feature model.Feature
-	result = db.GetDB().First(&feature, "name = ?", featureName)
-	if result.Error != nil {
-		return &variant, nil, nil, fiber.NewError(fiber.StatusNotFound, "Feature not found")
-	}
-
-	var variantFeature model.VariantFeature
-	result = db.GetDB().Preload("Feature").Preload("Variant").Where("variant_id = ? AND feature_id = ?", variantID, feature.ID).First(&variantFeature)
-	if result.Error != nil {
-		return &variant, &feature, nil, nil
-	}
-
-	return &variant, &feature, &variantFeature, nil
-}
 
 func AddVariantFeature(c *fiber.Ctx) error {
 	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId"})
@@ -41,7 +20,7 @@ func AddVariantFeature(c *fiber.Ctx) error {
 	}
 
 	// Check if variant exists and belongs to the test
-	variant, feature, existingVariantFeature, err := checkEntities(ids["testId"], ids["variantId"], payload.Name)
+	variant, feature, existingVariantFeature, err := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
 	if err != nil {
 		return c.Status(err.(*fiber.Error).Code).SendString(err.Error())
 	}
@@ -90,7 +69,7 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 	}
 
 	// Check if entities exist
-	_, _, variantFeature, err := checkEntities(ids["testId"], ids["variantId"], payload.Name)
+	_, _, variantFeature, err := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
 	if err != nil {
 		return c.Status(err.(*fiber.Error).Code).SendString(err.Error())
 	}
