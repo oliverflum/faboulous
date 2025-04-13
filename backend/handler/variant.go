@@ -56,7 +56,7 @@ func AddVariant(c *fiber.Ctx) error {
 	}
 
 	payload := &model.VariantWritePayload{}
-	err = util.ValidatePayload[model.VariantWritePayload](c, payload)
+	err = util.ValidatePayload(c, payload)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func UpdateVariant(c *fiber.Ctx) error {
 	}
 
 	payload := &model.VariantWritePayload{}
-	err = util.ValidatePayload[model.VariantWritePayload](c, payload)
+	err = util.ValidatePayload(c, payload)
 	if err != nil {
 		return err
 	}
