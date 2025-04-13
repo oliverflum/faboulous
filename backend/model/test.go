@@ -67,7 +67,7 @@ type TestPayload struct {
 func NewTestPayload(test *Test) (TestPayload, error) {
 	variants := make([]VariantPayload, len(test.Variants))
 	for i, variant := range test.Variants {
-		payload, err := NewVariantPayload(variant)
+		payload, err := NewTestVariantPayload(variant)
 		if err != nil {
 			return TestPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not convert variant entity to payload: "+err.Error())
 		}

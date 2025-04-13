@@ -27,26 +27,27 @@ func SetupApp() *fiber.App {
 	featureApi := configApi.Group("/feature")
 	featureApi.Get("/", handler.ListFeatures)
 	featureApi.Post("/", handler.AddFeature)
-	featureApi.Put("/:id", handler.UpdateFeature)
-	featureApi.Get("/:id", handler.GetFeature)
-	featureApi.Delete("/:id", handler.DeleteFeature)
+	featureApi.Put("/:featureId", handler.UpdateFeature)
+	featureApi.Get("/:featureId", handler.GetFeature)
+	featureApi.Delete("/:featureId", handler.DeleteFeature)
 
 	testApi := configApi.Group("/test")
 	testApi.Get("/", handler.ListTests)
 	testApi.Post("/", handler.AddTest)
-	testApi.Put("/:id", handler.UpdateTest)
-	testApi.Get("/:id", handler.GetTest)
-	testApi.Delete("/:id", handler.DeleteTest)
+	testApi.Put("/:testId", handler.UpdateTest)
+	testApi.Get("/:testId", handler.GetTest)
+	testApi.Delete("/:testId", handler.DeleteTest)
 
 	variantApi := testApi.Group(":testId/variant")
+	variantApi.Get("/", handler.ListVariants)
 	variantApi.Post("/", handler.AddVariant)
-	variantApi.Put("/:id", handler.UpdateVariant)
-	variantApi.Delete("/:id", handler.DeleteVariant)
+	variantApi.Put("/:variantId", handler.UpdateVariant)
+	variantApi.Delete("/:variantId", handler.DeleteVariant)
 
 	variantFeatureApi := variantApi.Group(":variantId/feature")
 	variantFeatureApi.Post("/", handler.AddVariantFeature)
-	variantFeatureApi.Put("/:id", handler.UpdateVariantFeature)
-	variantFeatureApi.Delete("/:id", handler.DeleteVariantFeature)
+	variantFeatureApi.Put("/:variantFeatureId", handler.UpdateVariantFeature)
+	variantFeatureApi.Delete("/:variantFeatureId", handler.DeleteVariantFeature)
 
 	return app
 }

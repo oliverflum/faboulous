@@ -50,11 +50,11 @@ func AddTest(c *fiber.Ctx) error {
 }
 
 func GetTest(c *fiber.Ctx) error {
-	testIDs, err := util.ReadIdsFromParams(c, []string{"id"})
+	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
-	test, err := service.GetTestByID(testIDs["id"], true)
+	test, err := service.GetTestByID(testIDs["testId"], true)
 	if err != nil {
 		return err
 	}
@@ -63,11 +63,11 @@ func GetTest(c *fiber.Ctx) error {
 }
 
 func DeleteTest(c *fiber.Ctx) error {
-	testIDs, err := util.ReadIdsFromParams(c, []string{"id"})
+	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
-	test, err := service.GetTestByID(testIDs["id"], false)
+	test, err := service.GetTestByID(testIDs["testId"], false)
 	if err != nil {
 		return err
 	}
@@ -87,12 +87,12 @@ func UpdateTest(c *fiber.Ctx) error {
 		return err
 	}
 
-	testIDs, err := util.ReadIdsFromParams(c, []string{"id"})
+	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
 
-	test, err := service.GetTestByID(testIDs["id"], true)
+	test, err := service.GetTestByID(testIDs["testId"], true)
 	if err != nil {
 		return err
 	}

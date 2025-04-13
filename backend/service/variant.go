@@ -11,7 +11,7 @@ import (
 
 // sendVariantResponse handles the common logic for sending variant responses
 func SendVariantResponse(c *fiber.Ctx, variant model.Variant, statusCode int) error {
-	payload, err := model.NewVariantPayload(variant)
+	payload, err := model.NewVariantPayload(variant, db.GetDB())
 	if err != nil {
 		return err
 	}

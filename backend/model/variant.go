@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -34,10 +35,37 @@ type VariantWritePayload struct {
 
 type VariantPayload struct {
 	VariantWritePayload
-	Id uint `json:"id"`
+	Id       uint             `json:"id"`
+	Features []FeaturePayload `json:"features,omitempty"`
 }
 
-func NewVariantPayload(variant Variant) (VariantPayload, error) {
+func NewVariantPayload(variant Variant, db *gorm.DB) (VariantPayload, error) {
+	features := make([]FeaturePayload, len(variant.Features))
+	for i, feature := range variant.Features {
+		variantFeature := &VariantFeature{}
+		res := db.First(variantFeature, "variant_id = ? AND feature_id = ?", variant.ID, feature.ID)
+		if res.Error != nil {
+			return VariantPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Feature not linked to variant")
+		}
+		payload := FeaturePayload{
+			Id: variantFeature.ID,
+			FeatureWritePayload: FeatureWritePayload{
+				Name:  feature.Name,
+				Value: variantFeature.Value,
+			},
+		}
+		features[i] = payload
+	}
+	return VariantPayload{
+		VariantWritePayload: VariantWritePayload{
+			Name: variant.Name,
+		},
+		Id:       variant.ID,
+		Features: features,
+	}, nil
+}
+
+func NewTestVariantPayload(variant Variant) (VariantPayload, error) {
 	return VariantPayload{
 		VariantWritePayload: VariantWritePayload{
 			Name: variant.Name,

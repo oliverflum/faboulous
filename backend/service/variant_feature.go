@@ -27,3 +27,13 @@ func CheckEntities(testID uint, variantID uint, featureName string) (*model.Vari
 
 	return &variant, &feature, &variantFeature, nil
 }
+
+func GetVariantFeaturePayload(variantFeature *model.VariantFeature) (*model.FeaturePayload, error) {
+	return &model.FeaturePayload{
+		Id: variantFeature.ID,
+		FeatureWritePayload: model.FeatureWritePayload{
+			Name:  variantFeature.Feature.Name,
+			Value: variantFeature.Value,
+		},
+	}, nil
+}

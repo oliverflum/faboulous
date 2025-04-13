@@ -8,6 +8,31 @@ import (
 	"github.com/oliverflum/faboulous/backend/service"
 )
 
+func ListVariants(c *fiber.Ctx) error {
+	ids, err := util.ReadIdsFromParams(c, []string{"testId"})
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
+	}
+
+	variants := make([]model.Variant, 0)
+	result := db.GetDB().Preload("Features").Where("test_id = ?", ids["testId"]).Find(&variants)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+	}
+
+	variantPayloads := make([]model.VariantPayload, len(variants))
+	for i, variant := range variants {
+		payload, err := model.NewVariantPayload(variant, db.GetDB())
+		if err != nil {
+			return err
+		}
+
+		variantPayloads[i] = payload
+	}
+
+	return c.Status(fiber.StatusOK).JSON(variantPayloads)
+}
+
 func AddVariant(c *fiber.Ctx) error {
 	ids, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
@@ -46,7 +71,7 @@ func AddVariant(c *fiber.Ctx) error {
 }
 
 func UpdateVariant(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "id"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
@@ -57,7 +82,7 @@ func UpdateVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	variant, err := service.GetVariant(ids["id"], false)
+	variant, err := service.GetVariant(ids["variantId"], false)
 	if err != nil {
 		return err
 	}
@@ -85,12 +110,12 @@ func UpdateVariant(c *fiber.Ctx) error {
 }
 
 func DeleteVariant(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "id"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
 
-	variant, err := service.GetVariant(ids["id"], false)
+	variant, err := service.GetVariant(ids["variantId"], false)
 	if err != nil {
 		return err
 	}

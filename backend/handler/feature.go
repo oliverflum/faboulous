@@ -56,7 +56,7 @@ func AddFeature(c *fiber.Ctx) error {
 }
 
 func GetFeature(c *fiber.Ctx) error {
-	feature, err := service.GetFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("featureId"))
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func GetFeature(c *fiber.Ctx) error {
 }
 
 func DeleteFeature(c *fiber.Ctx) error {
-	feature, err := service.GetFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("featureId"))
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func UpdateFeature(c *fiber.Ctx) error {
 		return err
 	}
 
-	feature, err := service.GetFeatureByID(c.Params("id"))
+	feature, err := service.GetFeatureByID(c.Params("featureId"))
 	if err != nil {
 		return err
 	}

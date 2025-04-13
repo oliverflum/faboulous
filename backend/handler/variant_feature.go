@@ -58,7 +58,7 @@ func AddVariantFeature(c *fiber.Ctx) error {
 }
 
 func UpdateVariantFeature(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "id"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "variantFeatureId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
 	}
@@ -99,7 +99,7 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 }
 
 func DeleteVariantFeature(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "id"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "variantFeatureId"})
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
 	}
