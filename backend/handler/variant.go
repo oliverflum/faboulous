@@ -40,9 +40,9 @@ func AddVariant(c *fiber.Ctx) error {
 	}
 
 	payload := &model.VariantWritePayload{}
-	err = util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	// Check if test exists
@@ -77,9 +77,9 @@ func UpdateVariant(c *fiber.Ctx) error {
 	}
 
 	payload := &model.VariantWritePayload{}
-	err = util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	variant, err := service.GetVariant(ids["variantId"], false)

@@ -35,9 +35,9 @@ func ListTests(c *fiber.Ctx) error {
 
 func AddTest(c *fiber.Ctx) error {
 	payload := &model.TestWritePayload{}
-	err := util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	test := model.NewTest(payload)
@@ -82,9 +82,9 @@ func DeleteTest(c *fiber.Ctx) error {
 
 func UpdateTest(c *fiber.Ctx) error {
 	payload := &model.TestWritePayload{}
-	err := util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})

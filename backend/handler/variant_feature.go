@@ -14,9 +14,10 @@ func AddVariantFeature(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
 	}
 
-	var payload model.FeatureWritePayload
-	if err := util.ValidatePayload(c, &payload); err != nil {
-		return err
+	payload := &model.FeatureWritePayload{}
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	// Check if variant exists and belongs to the test
@@ -50,7 +51,7 @@ func AddVariantFeature(c *fiber.Ctx) error {
 	}
 
 	res := model.FeaturePayload{
-		FeatureWritePayload: payload,
+		FeatureWritePayload: *payload,
 		Id:                  variantFeature.ID,
 	}
 
@@ -63,9 +64,10 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
 	}
 
-	var payload model.FeatureWritePayload
-	if err := util.ValidatePayload(c, &payload); err != nil {
-		return err
+	payload := &model.FeatureWritePayload{}
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	// Check if entities exist

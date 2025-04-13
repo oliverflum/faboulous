@@ -33,9 +33,9 @@ func ListFeatures(c *fiber.Ctx) error {
 
 func AddFeature(c *fiber.Ctx) error {
 	payload := &model.FeatureWritePayload{}
-	err := util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	if service.CheckFeatureExists(payload.Name) {
@@ -80,9 +80,9 @@ func DeleteFeature(c *fiber.Ctx) error {
 
 func UpdateFeature(c *fiber.Ctx) error {
 	payload := &model.FeatureWritePayload{}
-	err := util.ValidatePayload(c, payload)
-	if err != nil {
-		return err
+	valErr := util.ParseAndValidatePayload(c, payload)
+	if valErr != nil {
+		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
 	feature, err := service.GetFeatureByID(c.Params("featureId"))

@@ -27,15 +27,20 @@ func ValidateStruct(item any) []*ErrorResponse {
 	return errors
 }
 
-func ValidatePayload[T any](c *fiber.Ctx, payload *T) error {
+func ParseAndValidatePayload[T any](c *fiber.Ctx, payload *T) *fiber.Error {
 	if err := c.BodyParser(payload); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	// Validate the payload
 	errors := ValidateStruct(payload)
+
 	if len(errors) > 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(errors)
+		errorsString := ""
+		for _, error := range errors {
+			errorsString += error.FailedField + " " + error.Tag + " " + error.Value + "\n"
+		}
+		return fiber.NewError(fiber.StatusBadRequest, errorsString)
 	}
 	return nil
 }
