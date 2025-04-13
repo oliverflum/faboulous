@@ -15,11 +15,11 @@ const (
 
 type Test struct {
 	gorm.Model
-	Name                  string    `gorm:"unique;not null"`
-	Active                bool      `gorm:"default:false"`
-	Method                string    `gorm:"not null"`
-	CollapseControlGroups bool      `gorm:"default:true"`
-	Variants              []Variant `gorm:"foreignKey:TestID"`
+	Name                    string    `gorm:"unique;not null"`
+	Active                  bool      `gorm:"default:false"`
+	Method                  string    `gorm:"not null"`
+	CollapseControlVariants bool      `gorm:"default:true"`
+	Variants                []Variant `gorm:"foreignKey:TestID"`
 }
 
 func (t *Test) UpdateFromPayload(payload *TestWritePayload) error {
@@ -44,19 +44,19 @@ func (t *Test) AppendVariants(db *gorm.DB, payload *TestPayload) error {
 
 func NewTest(payload *TestWritePayload) Test {
 	return Test{
-		Name:                  payload.Name,
-		Active:                payload.Active,
-		Method:                payload.Method,
-		CollapseControlGroups: payload.CollapseControlGroups,
-		Variants:              make([]Variant, 0),
+		Name:                    payload.Name,
+		Active:                  payload.Active,
+		Method:                  payload.Method,
+		CollapseControlVariants: payload.CollapseControlVariants,
+		Variants:                make([]Variant, 0),
 	}
 }
 
 type TestWritePayload struct {
-	Name                  string `json:"name" validate:"required"`
-	Active                bool   `json:"active"`
-	Method                string `json:"method" validate:"required,oneof=HASH RANDOM"`
-	CollapseControlGroups bool   `json:"collapseControlGroups"`
+	Name                    string `json:"name" validate:"required"`
+	Active                  bool   `json:"active"`
+	Method                  string `json:"method" validate:"required,oneof=HASH RANDOM"`
+	CollapseControlVariants bool   `json:"CollapseControlVariants"`
 }
 type TestPayload struct {
 	TestWritePayload
@@ -75,10 +75,10 @@ func NewTestPayload(test *Test) (TestPayload, error) {
 	}
 	return TestPayload{
 		TestWritePayload: TestWritePayload{
-			Name:                  test.Name,
-			Active:                test.Active,
-			Method:                test.Method,
-			CollapseControlGroups: test.CollapseControlGroups,
+			Name:                    test.Name,
+			Active:                  test.Active,
+			Method:                  test.Method,
+			CollapseControlVariants: test.CollapseControlVariants,
 		},
 		Id:       test.ID,
 		Variants: variants,
