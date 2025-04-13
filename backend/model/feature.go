@@ -62,3 +62,5 @@ func NewFeaturePayload(feature *Feature) (*FeaturePayload, error) {
 		},
 	}, nil
 }
+
+type FeatureSet map[string]any

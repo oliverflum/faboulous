@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -35,24 +34,14 @@ type VariantWritePayload struct {
 
 type VariantPayload struct {
 	VariantWritePayload
-	Id       uint             `json:"id"`
-	Features []FeaturePayload `json:"features"`
+	Id uint `json:"id"`
 }
 
 func NewVariantPayload(variant Variant) (VariantPayload, error) {
-	features := make([]FeaturePayload, len(variant.Features))
-	for i, feature := range variant.Features {
-		payload, err := NewFeaturePayload(&feature)
-		if err != nil {
-			return VariantPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not convert feature entity to payload: "+err.Error())
-		}
-		features[i] = *payload
-	}
 	return VariantPayload{
 		VariantWritePayload: VariantWritePayload{
 			Name: variant.Name,
 		},
-		Id:       variant.ID,
-		Features: features,
+		Id: variant.ID,
 	}, nil
 }

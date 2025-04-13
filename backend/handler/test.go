@@ -13,7 +13,6 @@ func ListTests(c *fiber.Ctx) error {
 
 	result := db.GetDB().
 		Preload("Variants").
-		Preload("Variants.Features").
 		Find(&tests)
 	if result.Error != nil {
 		return util.SendErrorRes(c, util.HandleGormError(result.Error))
@@ -107,4 +106,9 @@ func UpdateTest(c *fiber.Ctx) error {
 	}
 
 	return service.SendTestResponse(c, test, fiber.StatusOK)
+}
+
+func Publish(c *fiber.Ctx) error {
+	// Implement the logic for publishing
+	return c.SendStatus(fiber.StatusOK)
 }

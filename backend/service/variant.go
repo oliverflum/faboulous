@@ -19,16 +19,16 @@ func SendVariantResponse(c *fiber.Ctx, variant model.Variant, statusCode int) er
 }
 
 // getVariantByID retrieves a variant by ID and test ID, returns an error if not found
-func GetVariant(testID uint, variantID uint, preloadFeatures bool) (*model.Variant, error) {
+func GetVariant(variantID uint, preloadFeatures bool) (*model.Variant, error) {
 	var variant model.Variant
 	var result *gorm.DB
 	if preloadFeatures {
 		result = db.GetDB().
 			Preload("Features").
-			Where("id = ? AND test_id = ?", variantID, testID).
+			Where("id = ?", variantID).
 			First(&variant)
 	} else {
-		result = db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
+		result = db.GetDB().Where("id = ?", variantID).First(&variant)
 	}
 
 	if result.RowsAffected == 0 {

@@ -23,7 +23,6 @@ func GetTestByID(id uint, preloadVariants bool) (*model.Test, error) {
 	if preloadVariants {
 		result = db.GetDB().
 			Preload("Variants").
-			Preload("Variants.Features").
 			First(&test, id)
 	} else {
 		result = db.GetDB().First(&test, id)

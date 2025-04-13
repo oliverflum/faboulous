@@ -21,6 +21,9 @@ func SetupApp() *fiber.App {
 
 	configApi := api.Group("/admin")
 
+	// Add the publish route
+	configApi.Post("/publish", handler.Publish)
+
 	featureApi := configApi.Group("/feature")
 	featureApi.Get("/", handler.ListFeatures)
 	featureApi.Post("/", handler.AddFeature)

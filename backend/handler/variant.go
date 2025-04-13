@@ -57,7 +57,7 @@ func UpdateVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	variant, err := service.GetVariant(ids["testId"], ids["id"], false)
+	variant, err := service.GetVariant(ids["id"], false)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func DeleteVariant(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
 
-	variant, err := service.GetVariant(ids["testId"], ids["id"], false)
+	variant, err := service.GetVariant(ids["id"], false)
 	if err != nil {
 		return err
 	}
