@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	"github.com/oliverflum/faboulous/model"
-	"github.com/oliverflum/faboulous/util"
+	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -19,8 +19,16 @@ const portEnvVar = "FAB_DB_PORT"
 const dbNameVar = "FAB_DB_DB_NAME"
 const dbTypeVar = "FAB_DB_TYPE"
 
-func InitSqliteDB() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+func InitSqliteDB(inMemory bool) *gorm.DB {
+	var db *gorm.DB
+	var err error
+
+	if inMemory {
+		db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	} else {
+		db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	}
+
 	if err != nil {
 		panic("Failed to connect database")
 	}
@@ -58,11 +66,13 @@ func InitDB() *gorm.DB {
 	dbType := util.ReadEnvVars(envTypeVarNameArr)[dbTypeVar]
 	var db *gorm.DB
 	if dbType == "sqlite" {
-		db = InitSqliteDB()
+		db = InitSqliteDB(false)
 	} else if dbType == "mysql" {
 		db = InitMysqlDB()
+	} else if dbType == "memory" {
+		db = InitSqliteDB(true)
 	} else {
-		panic("Invalid database type. Supported types are: sqlite, mysql")
+		panic("Invalid database type. Supported types are: sqlite, mysql, memory")
 	}
 	db.AutoMigrate(&model.Feature{}, &model.Test{}, &model.Variant{}, &model.VariantFeature{})
 	return db

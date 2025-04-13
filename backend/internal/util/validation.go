@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 type ErrorResponse struct {
@@ -10,7 +11,7 @@ type ErrorResponse struct {
 	Value       string
 }
 
-func ValidateStruct(item interface{}) []*ErrorResponse {
+func ValidateStruct(item any) []*ErrorResponse {
 	var validate = validator.New()
 	var errors []*ErrorResponse
 	err := validate.Struct(item)
@@ -24,4 +25,17 @@ func ValidateStruct(item interface{}) []*ErrorResponse {
 		}
 	}
 	return errors
+}
+
+func ValidatePayload[T any](c *fiber.Ctx, payload *T) error {
+	if err := c.BodyParser(payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	// Validate the payload
+	errors := ValidateStruct(payload)
+	if len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+	return nil
 }

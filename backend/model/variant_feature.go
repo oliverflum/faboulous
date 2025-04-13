@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 
+	"github.com/oliverflum/faboulous/backend/internal/util"
 	"gorm.io/gorm"
 )
 
@@ -11,11 +12,12 @@ type VariantFeature struct {
 	FeatureID uint    `gorm:"primaryKey"`
 	VariantID uint    `gorm:"primaryKey"`
 	Feature   Feature `gorm:"foreignKey:FeatureID"`
+	Variant   Variant `gorm:"foreignKey:VariantID"`
 	Value     string
 }
 
 func (variantFeature *VariantFeature) SetValue(value any) error {
-	valueType, stringValue, err := GetEntityValueAndType(value)
+	valueType, stringValue, err := util.GetValueTypeAndString(value)
 	if err != nil {
 		return fmt.Errorf("could not set variant feature value: %w", err)
 	}
@@ -32,7 +34,7 @@ func (variantFeature *VariantFeature) GetValue() (any, error) {
 	if variantFeature.Feature.ID == 0 {
 		return nil, fmt.Errorf("feature not found")
 	}
-	value, err := GetPayloadValue(variantFeature.Value, variantFeature.Feature.Type)
+	value, err := util.GetJsonValue(variantFeature.Value, variantFeature.Feature.Type)
 	if err != nil {
 		return nil, fmt.Errorf("could not get variant feature value: %w", err)
 	}

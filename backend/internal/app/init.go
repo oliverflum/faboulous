@@ -1,24 +1,25 @@
-package main
+package app
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/db"
-	"github.com/oliverflum/faboulous/handler"
+	"github.com/oliverflum/faboulous/backend/handler"
+	"github.com/oliverflum/faboulous/backend/internal/db"
+	"github.com/oliverflum/faboulous/backend/internal/util"
 )
 
-func main() {
+func SetupApp() *fiber.App {
 	app := fiber.New()
-	log.SetLevel(log.LevelTrace)
+
+	log.SetLevel(util.GetLogLevel())
 	app.Use(logger.New())
 
 	db.InitDB()
 
 	api := app.Group("/api")
 
-	configApi := api.Group("/config")
+	configApi := api.Group("/admin")
 
 	featureApi := configApi.Group("/feature")
 	featureApi.Get("/", handler.ListFeatures)
@@ -39,5 +40,10 @@ func main() {
 	variantApi.Put("/:id", handler.UpdateVariant)
 	variantApi.Delete("/:id", handler.DeleteVariant)
 
-	log.Fatal(app.Listen(":3000"))
+	variantFeatureApi := variantApi.Group(":variantId/feature")
+	variantFeatureApi.Post("/", handler.AddVariantFeature)
+	variantFeatureApi.Put("/:id", handler.UpdateVariantFeature)
+	variantFeatureApi.Delete("/:id", handler.DeleteVariantFeature)
+
+	return app
 }

@@ -15,7 +15,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/config/feature",
+							"raw": "{{base_url}}/api/admin/feature",
 							"host": [
 								"{{base_url}}"
 							],
@@ -39,7 +39,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/config/feature",
+							"raw": "{{base_url}}/api/admin/feature",
 							"host": [
 								"{{base_url}}"
 							],
@@ -72,7 +72,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/config/feature/{{featureId}}",
+							"raw": "{{base_url}}/api/admin/feature/{{featureId}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -91,6 +91,223 @@
 		{
 			"name": "Tests",
 			"item": [
+				{
+					"name": "Variants",
+					"item": [
+						{
+							"name": "Features",
+							"item": [
+								{
+									"name": "Add Variant Feature",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"config",
+												"test",
+												"{{testId}}",
+												"variant"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update Variant Feature",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"config",
+												"test",
+												"{{testId}}",
+												"variant"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Add Variant",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"config",
+										"test",
+										"{{testId}}",
+										"variant"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Variant",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 10.0\n        },\n        {\n            \"name\": \"New Feature\",\n            \"value\": true\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/test/:testId/variant/:id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"config",
+										"test",
+										":testId",
+										"variant",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "testId",
+											"value": "1"
+										},
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Variant Copy",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/test/:testId/variant/:id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"config",
+										"test",
+										":testId",
+										"variant",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "testId",
+											"value": "1"
+										},
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "List Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"config",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Add Test",
 					"request": {
@@ -111,7 +328,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/config/test",
+							"raw": "{{base_url}}/api/admin/test",
 							"host": [
 								"{{base_url}}"
 							],
@@ -135,7 +352,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/config/test/:id",
+							"raw": "{{base_url}}/api/admin/test/:id",
 							"host": [
 								"{{base_url}}"
 							],
@@ -146,111 +363,6 @@
 								":id"
 							],
 							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Tests",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/config/test",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"config",
-								"test"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Variants",
-			"item": [
-				{
-					"name": "Add Variant",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/config/test/{{testId}}/variant",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"config",
-								"test",
-								"{{testId}}",
-								"variant"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Variant",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 10.0\n        },\n        {\n            \"name\": \"New Feature\",\n            \"value\": true\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/config/test/:testId/variant/:id",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"config",
-								"test",
-								":testId",
-								"variant",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "testId",
-									"value": "1"
-								},
 								{
 									"key": "id",
 									"value": "1"

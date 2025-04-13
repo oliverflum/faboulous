@@ -1,4 +1,4 @@
-module github.com/oliverflum/faboulous
+module github.com/oliverflum/faboulous/backend
 
 go 1.24
 
