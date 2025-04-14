@@ -2,20 +2,16 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/db"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/model"
 	"github.com/oliverflum/faboulous/backend/service"
+	"github.com/oliverflum/faboulous/backend/util"
 )
 
 func ListTests(c *fiber.Ctx) error {
-	var tests []model.Test
-
-	result := db.GetDB().
-		Preload("Variants").
-		Find(&tests)
-	if result.Error != nil {
-		return util.HandleGormError(result)
+	tests, err := service.GetAllTests(true)
+	if err != nil {
+		return err
 	}
 
 	if len(tests) == 0 {
@@ -38,6 +34,11 @@ func AddTest(c *fiber.Ctx) error {
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
 		return valErr
+	}
+
+	err := service.CheckIfMethodAllowed(payload.Method)
+	if err != nil {
+		return err
 	}
 
 	test := model.NewTest(payload)
@@ -92,7 +93,12 @@ func UpdateTest(c *fiber.Ctx) error {
 		return valErr
 	}
 
-	test, err := service.GetTestByID(ids["testId"], true)
+	err = service.CheckIfMethodAllowed(payload.Method)
+	if err != nil {
+		return err
+	}
+
+	test, err := service.GetTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}
@@ -105,9 +111,4 @@ func UpdateTest(c *fiber.Ctx) error {
 	}
 
 	return service.SendTestResponse(c, test, fiber.StatusOK)
-}
-
-func Publish(c *fiber.Ctx) error {
-	// Implement the logic for publishing
-	return c.SendStatus(fiber.StatusOK)
 }

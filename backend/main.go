@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2/log"
 
-	"github.com/oliverflum/faboulous/backend/internal/app"
+	"github.com/oliverflum/faboulous/backend/app"
 )
 
 func main() {

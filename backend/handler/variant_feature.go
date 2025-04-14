@@ -2,10 +2,10 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/db"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/model"
 	"github.com/oliverflum/faboulous/backend/service"
+	"github.com/oliverflum/faboulous/backend/util"
 )
 
 func AddVariantFeature(c *fiber.Ctx) error {

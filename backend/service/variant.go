@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/db"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/util"
 	"gorm.io/gorm"
 )
 
@@ -45,11 +45,11 @@ func CheckVariantExists(name string, testID uint) bool {
 	return result.RowsAffected > 0
 }
 
-func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.Variant, variantSize int) error {
+func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.Variant, variantSize uint) error {
 	variants := test.Variants
 
-	usedUpSize := 0
-	biggestVariantSize := 0
+	usedUpSize := uint(0)
+	biggestVariantSize := uint(0)
 
 	variantExists := false
 

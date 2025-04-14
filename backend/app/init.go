@@ -4,9 +4,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/handler"
-	"github.com/oliverflum/faboulous/backend/internal/db"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/util"
 )
 
 func SetupApp() *fiber.App {

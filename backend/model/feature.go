@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/util"
 	"gorm.io/gorm"
 )
 
@@ -65,3 +65,10 @@ func NewFeaturePayload(feature *Feature) (*FeaturePayload, *fiber.Error) {
 }
 
 type FeatureSet map[string]any
+
+type FeatureInfo struct {
+	VariantId   uint        `json:"variant_id"`
+	VariantName string      `json:"variant_name"`
+	VariantSize uint        `json:"variant_size"`
+	FeatureSet  *FeatureSet `json:"feature_set"`
+}

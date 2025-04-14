@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/app"
+	"github.com/oliverflum/faboulous/backend/app"
 	"github.com/oliverflum/faboulous/backend/model"
 	"github.com/stretchr/testify/assert"
 )

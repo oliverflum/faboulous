@@ -2,9 +2,9 @@ package service
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/db"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/util"
 )
 
 // sendFeatureResponse handles the common logic for sending feature responses
@@ -31,4 +31,13 @@ func GetFeatureByID(id uint) (*model.Feature, *fiber.Error) {
 		return nil, util.HandleGormError(result)
 	}
 	return &feature, nil
+}
+
+func GetAllFeatures() ([]*model.Feature, *fiber.Error) {
+	var features []*model.Feature
+	result := db.GetDB().Find(&features)
+	if result.Error != nil {
+		return nil, util.HandleGormError(result)
+	}
+	return features, nil
 }

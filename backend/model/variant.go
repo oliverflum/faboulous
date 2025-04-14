@@ -8,7 +8,7 @@ import (
 type Variant struct {
 	gorm.Model
 	Name     string `gorm:"not null;primary_key"`
-	Size     int    `gorm:"not null"`
+	Size     uint   `gorm:"not null"`
 	Test     Test
 	TestID   uint      `gorm:"not null;primary_key"`
 	Features []Feature `gorm:"many2many:variant_features;foreignKey:ID;joinForeignKey:VariantID;References:ID;joinReferences:FeatureID"`
@@ -29,7 +29,7 @@ func NewVariant(payload VariantWritePayload) Variant {
 
 type VariantWritePayload struct {
 	Name string `json:"name" validate:"required"`
-	Size int    `json:"size" validate:"required,min=5,max=50"`
+	Size uint   `json:"size" validate:"required,min=5,max=50"`
 }
 
 type VariantPayload struct {

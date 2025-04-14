@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/oliverflum/faboulous/backend/internal/util"
+	"github.com/oliverflum/faboulous/backend/util"
 	"gorm.io/gorm"
 )
 

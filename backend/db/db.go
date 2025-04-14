@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
