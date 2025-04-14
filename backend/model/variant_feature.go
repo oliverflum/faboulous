@@ -1,8 +1,7 @@
 package model
 
 import (
-	"fmt"
-
+	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/internal/util"
 	"gorm.io/gorm"
 )
@@ -16,27 +15,27 @@ type VariantFeature struct {
 	Value     string
 }
 
-func (variantFeature *VariantFeature) SetValue(value any) error {
+func (variantFeature *VariantFeature) SetValue(value any) *fiber.Error {
 	valueType, stringValue, err := util.GetValueTypeAndString(value)
 	if err != nil {
-		return fmt.Errorf("could not set variant feature value: %w", err)
+		return err
 	}
 
 	// Access the linked variant
 	if variantFeature.Feature.ID == 0 || variantFeature.Feature.Type != valueType {
-		return fmt.Errorf("assigns invalid value type to feature: %w", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid feature or value type")
 	}
 	variantFeature.Value = stringValue
 	return nil
 }
 
-func (variantFeature *VariantFeature) GetValue() (any, error) {
+func (variantFeature *VariantFeature) GetValue() (any, *fiber.Error) {
 	if variantFeature.Feature.ID == 0 {
-		return nil, fmt.Errorf("feature not found")
+		return nil, fiber.NewError(fiber.StatusNotFound, "Feature not found")
 	}
 	value, err := util.GetJsonValue(variantFeature.Value, variantFeature.Feature.Type)
 	if err != nil {
-		return nil, fmt.Errorf("could not get variant feature value: %w", err)
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "could not get variant feature value: "+err.Error())
 	}
 	return value, nil
 }

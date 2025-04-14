@@ -14,10 +14,9 @@ type Variant struct {
 	Features []Feature `gorm:"many2many:variant_features;foreignKey:ID;joinForeignKey:VariantID;References:ID;joinReferences:FeatureID"`
 }
 
-func (variant *Variant) UpdateFromPayload(payload VariantWritePayload) error {
+func (variant *Variant) UpdateFromPayload(payload VariantWritePayload) {
 	variant.Name = payload.Name
 	variant.Size = payload.Size
-	return nil
 }
 
 func NewVariant(payload VariantWritePayload) Variant {
@@ -59,6 +58,7 @@ func NewVariantPayload(variant Variant, db *gorm.DB) (VariantPayload, error) {
 	return VariantPayload{
 		VariantWritePayload: VariantWritePayload{
 			Name: variant.Name,
+			Size: variant.Size,
 		},
 		Id:       variant.ID,
 		Features: features,

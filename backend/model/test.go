@@ -61,10 +61,10 @@ type TestWritePayload struct {
 type TestPayload struct {
 	TestWritePayload
 	Id       uint             `json:"id"`
-	Variants []VariantPayload `json:"variants"`
+	Variants []VariantPayload `json:"variants,omitempty"`
 }
 
-func NewTestPayload(test *Test) (TestPayload, error) {
+func NewTestPayload(test *Test) (TestPayload, *fiber.Error) {
 	variants := make([]VariantPayload, len(test.Variants))
 	for i, variant := range test.Variants {
 		payload, err := NewTestVariantPayload(variant)

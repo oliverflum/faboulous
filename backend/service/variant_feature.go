@@ -6,7 +6,7 @@ import (
 	"github.com/oliverflum/faboulous/backend/model"
 )
 
-func CheckEntities(testID uint, variantID uint, featureName string) (*model.Variant, *model.Feature, *model.VariantFeature, error) {
+func CheckEntities(testID uint, variantID uint, featureName string) (*model.Variant, *model.Feature, *model.VariantFeature, *fiber.Error) {
 	var variant model.Variant
 	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
 	if result.Error != nil {

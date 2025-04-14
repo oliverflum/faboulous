@@ -11,28 +11,28 @@ import (
 func AddVariantFeature(c *fiber.Ctx) error {
 	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId"})
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
+		return err
 	}
 
 	payload := &model.FeatureWritePayload{}
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
-		return c.Status(valErr.Code).SendString(valErr.Message)
+		return valErr
 	}
 
 	// Check if variant exists and belongs to the test
-	variant, feature, existingVariantFeature, err := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
-	if err != nil {
-		return c.Status(err.(*fiber.Error).Code).SendString(err.Error())
+	variant, feature, existingVariantFeature, checkErr := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
+	if checkErr != nil {
+		return checkErr
 	}
 
 	if existingVariantFeature != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Variant feature already exists")
 	}
 
-	valueType, value, err := util.GetValueTypeAndString(payload.Value)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	valueType, value, valueErr := util.GetValueTypeAndString(payload.Value)
+	if valueErr != nil {
+		return valueErr
 	}
 
 	if valueType != feature.Type {
@@ -47,7 +47,7 @@ func AddVariantFeature(c *fiber.Ctx) error {
 
 	result := db.GetDB().Create(&variantFeature)
 	if result.Error != nil {
-		return util.SendErrorRes(c, result.Error)
+		return util.HandleGormError(result)
 	}
 
 	res := model.FeaturePayload{
@@ -61,39 +61,37 @@ func AddVariantFeature(c *fiber.Ctx) error {
 func UpdateVariantFeature(c *fiber.Ctx) error {
 	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "variantFeatureId"})
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
+		return err
 	}
 
 	payload := &model.FeatureWritePayload{}
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
-		return c.Status(valErr.Code).SendString(valErr.Message)
+		return valErr
 	}
 
-	// Check if entities exist
-	_, _, variantFeature, err := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
-	if err != nil {
-		return c.Status(err.(*fiber.Error).Code).SendString(err.Error())
+	_, _, variantFeature, checkErr := service.CheckEntities(ids["testId"], ids["variantId"], payload.Name)
+	if checkErr != nil {
+		return checkErr
 	}
 
 	if variantFeature == nil {
-		return c.Status(fiber.StatusNotFound).SendString("Variant feature not found")
+		return fiber.NewError(fiber.StatusNotFound, "Variant feature not found")
 	}
 
 	// Update the value
 	if err := variantFeature.SetValue(payload.Value); err != nil {
-		return util.SendErrorRes(c, err)
+		return err
 	}
 
 	result := db.GetDB().Save(&variantFeature)
 	if result.Error != nil {
-		return util.SendErrorRes(c, result.Error)
+		return util.HandleGormError(result)
 	}
 
-	// Create the response payload
 	featurePayload, err := model.NewFeaturePayload(&variantFeature.Feature)
 	if err != nil {
-		return util.SendErrorRes(c, err)
+		return err
 	}
 	featurePayload.Value = payload.Value
 
@@ -110,12 +108,12 @@ func DeleteVariantFeature(c *fiber.Ctx) error {
 	var variantFeature model.VariantFeature
 	result := db.GetDB().Where("id = ?", ids["id"]).First(&variantFeature)
 	if result.Error != nil {
-		return c.Status(fiber.StatusNotFound).SendString("Variant feature not found")
+		return util.HandleGormError(result)
 	}
 
 	result = db.GetDB().Delete(&variantFeature)
 	if result.Error != nil {
-		return util.SendErrorRes(c, result.Error)
+		return util.HandleGormError(result)
 	}
 
 	return c.Status(fiber.StatusNoContent).Send(nil)

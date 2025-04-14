@@ -13,7 +13,7 @@ const (
 	FLOAT  = "FLOAT"
 )
 
-func GetValueTypeAndString(jsonValue any) (string, string, error) {
+func GetValueTypeAndString(jsonValue any) (string, string, *fiber.Error) {
 	switch v := jsonValue.(type) {
 	case bool:
 		return BOOL, fmt.Sprintf("%t", v), nil
@@ -28,7 +28,7 @@ func GetValueTypeAndString(jsonValue any) (string, string, error) {
 	}
 }
 
-func GetJsonValue(value string, valueType string) (any, error) {
+func GetJsonValue(value string, valueType string) (any, *fiber.Error) {
 	conversionError := fiber.NewError(fiber.StatusInternalServerError, "Invalid value for "+valueType+": "+value)
 	switch valueType {
 	case BOOL:

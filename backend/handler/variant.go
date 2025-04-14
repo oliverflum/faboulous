@@ -17,7 +17,9 @@ func ListVariants(c *fiber.Ctx) error {
 	variants := make([]model.Variant, 0)
 	result := db.GetDB().Preload("Features").Where("test_id = ?", ids["testId"]).Find(&variants)
 	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+		return util.HandleGormError(result)
+	} else if result.RowsAffected == 0 {
+		return fiber.NewError(fiber.StatusNotFound, "No variants found for this test")
 	}
 
 	variantPayloads := make([]model.VariantPayload, len(variants))
@@ -51,8 +53,8 @@ func AddVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := service.CheckVariantExists(payload.Name, ids["testId"]); err != nil {
-		return err
+	if service.CheckVariantExists(payload.Name, ids["testId"]) {
+		return fiber.NewError(fiber.StatusBadRequest, "Variant with this name already exists for this test")
 	}
 
 	if err := service.CheckVariantSizeConstraints(db.GetDB(), test, nil, payload.Size); err != nil {
@@ -96,14 +98,11 @@ func UpdateVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Update variant
-	if err := variant.UpdateFromPayload(*payload); err != nil {
-		return util.SendErrorRes(c, err)
-	}
+	variant.UpdateFromPayload(*payload)
 
 	result := db.GetDB().Save(variant)
 	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+		return util.HandleGormError(result)
 	}
 
 	return service.SendVariantResponse(c, *variant, fiber.StatusOK)
@@ -122,7 +121,7 @@ func DeleteVariant(c *fiber.Ctx) error {
 
 	result := db.GetDB().Delete(variant)
 	if result.Error != nil {
-		return util.SendErrorRes(c, util.HandleGormError(result.Error))
+		return util.HandleGormError(result)
 	}
 
 	return c.Status(fiber.StatusNoContent).Send(nil)

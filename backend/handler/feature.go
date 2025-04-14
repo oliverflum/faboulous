@@ -56,7 +56,11 @@ func AddFeature(c *fiber.Ctx) error {
 }
 
 func GetFeature(c *fiber.Ctx) error {
-	feature, err := service.GetFeatureByID(c.Params("featureId"))
+	ids, err := util.ReadIdsFromParams(c, []string{"featureId"})
+	if err != nil {
+		return err
+	}
+	feature, err := service.GetFeatureByID(ids["featureId"])
 	if err != nil {
 		return err
 	}
@@ -65,7 +69,11 @@ func GetFeature(c *fiber.Ctx) error {
 }
 
 func DeleteFeature(c *fiber.Ctx) error {
-	feature, err := service.GetFeatureByID(c.Params("featureId"))
+	ids, err := util.ReadIdsFromParams(c, []string{"featureId"})
+	if err != nil {
+		return err
+	}
+	feature, err := service.GetFeatureByID(ids["featureId"])
 	if err != nil {
 		return err
 	}
@@ -79,15 +87,18 @@ func DeleteFeature(c *fiber.Ctx) error {
 }
 
 func UpdateFeature(c *fiber.Ctx) error {
+	ids, err := util.ReadIdsFromParams(c, []string{"featureId"})
+	if err != nil {
+		return err
+	}
+	feature, err := service.GetFeatureByID(ids["featureId"])
+	if err != nil {
+		return err
+	}
 	payload := &model.FeatureWritePayload{}
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
 		return c.Status(valErr.Code).SendString(valErr.Message)
-	}
-
-	feature, err := service.GetFeatureByID(c.Params("featureId"))
-	if err != nil {
-		return err
 	}
 
 	feature.UpdateFromPayload(payload)

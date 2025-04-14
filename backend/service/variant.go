@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/internal/db"
+	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
 	"gorm.io/gorm"
 )
@@ -19,7 +20,7 @@ func SendVariantResponse(c *fiber.Ctx, variant model.Variant, statusCode int) er
 }
 
 // getVariantByID retrieves a variant by ID and test ID, returns an error if not found
-func GetVariant(variantID uint, preloadFeatures bool) (*model.Variant, error) {
+func GetVariant(variantID uint, preloadFeatures bool) (*model.Variant, *fiber.Error) {
 	var variant model.Variant
 	var result *gorm.DB
 	if preloadFeatures {
@@ -31,26 +32,19 @@ func GetVariant(variantID uint, preloadFeatures bool) (*model.Variant, error) {
 		result = db.GetDB().Where("id = ?", variantID).First(&variant)
 	}
 
-	if result.RowsAffected == 0 {
-		return nil, fiber.NewError(fiber.StatusNotFound, "Variant not found")
-	} else if result.Error != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error fetching variant: "+result.Error.Error())
+	if result.Error != nil {
+		return nil, util.HandleGormError(result)
 	}
 
 	return &variant, nil
 }
 
-// checkVariantExists checks if a variant with the same name exists for a test
-func CheckVariantExists(name string, testID uint) error {
+func CheckVariantExists(name string, testID uint) bool {
 	var existingVariant model.Variant
 	result := db.GetDB().Where("name = ? AND test_id = ?", name, testID).First(&existingVariant)
-	if result.RowsAffected > 0 {
-		return fiber.NewError(fiber.StatusBadRequest, "Variant with this name already exists for this test")
-	}
-	return nil
+	return result.RowsAffected > 0
 }
 
-// CheckVariantSizeConstraints verifies if a variant's size meets test constraints
 func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.Variant, variantSize int) error {
 	variants := test.Variants
 

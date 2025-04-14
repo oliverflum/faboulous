@@ -15,7 +15,7 @@ func ListTests(c *fiber.Ctx) error {
 		Preload("Variants").
 		Find(&tests)
 	if result.Error != nil {
-		return util.SendErrorRes(c, util.HandleGormError(result.Error))
+		return util.HandleGormError(result)
 	}
 
 	if len(tests) == 0 {
@@ -37,24 +37,24 @@ func AddTest(c *fiber.Ctx) error {
 	payload := &model.TestWritePayload{}
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
-		return c.Status(valErr.Code).SendString(valErr.Message)
+		return valErr
 	}
 
 	test := model.NewTest(payload)
 	result := db.GetDB().Create(&test)
-	if result.Error != nil || result.RowsAffected == 0 {
-		return c.Status(fiber.StatusInternalServerError).Send(nil)
+	if result.Error != nil {
+		return util.HandleGormError(result)
 	}
 
 	return service.SendTestResponse(c, &test, fiber.StatusCreated)
 }
 
 func GetTest(c *fiber.Ctx) error {
-	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
+		return err
 	}
-	test, err := service.GetTestByID(testIDs["testId"], true)
+	test, err := service.GetTestByID(ids["testId"], true)
 	if err != nil {
 		return err
 	}
@@ -63,36 +63,36 @@ func GetTest(c *fiber.Ctx) error {
 }
 
 func DeleteTest(c *fiber.Ctx) error {
-	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
+	ids, err := util.ReadIdsFromParams(c, []string{"testId"})
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
+		return err
 	}
-	test, err := service.GetTestByID(testIDs["testId"], false)
+	test, err := service.GetTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}
 
 	result := db.GetDB().Delete(test)
 	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+		return util.HandleGormError(result)
 	}
 
 	return c.Status(fiber.StatusNoContent).Send(nil)
 }
 
 func UpdateTest(c *fiber.Ctx) error {
+	ids, err := util.ReadIdsFromParams(c, []string{"testId"})
+	if err != nil {
+		return err
+	}
+
 	payload := &model.TestWritePayload{}
 	valErr := util.ParseAndValidatePayload(c, payload)
 	if valErr != nil {
-		return c.Status(valErr.Code).SendString(valErr.Message)
+		return valErr
 	}
 
-	testIDs, err := util.ReadIdsFromParams(c, []string{"testId"})
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
-	}
-
-	test, err := service.GetTestByID(testIDs["testId"], true)
+	test, err := service.GetTestByID(ids["testId"], true)
 	if err != nil {
 		return err
 	}
@@ -100,9 +100,8 @@ func UpdateTest(c *fiber.Ctx) error {
 	test.UpdateFromPayload(payload)
 
 	result := db.GetDB().Save(test)
-
 	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
+		return util.HandleGormError(result)
 	}
 
 	return service.SendTestResponse(c, test, fiber.StatusOK)

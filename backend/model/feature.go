@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/internal/util"
 	"gorm.io/gorm"
 )
@@ -47,11 +48,11 @@ type FeatureWritePayload struct {
 	Value any    `json:"value" validate:"required"`
 }
 
-func NewFeaturePayload(feature *Feature) (*FeaturePayload, error) {
+func NewFeaturePayload(feature *Feature) (*FeaturePayload, *fiber.Error) {
 	value, err := util.GetJsonValue(feature.DefaultValue, feature.Type)
 
 	if err != nil {
-		return &FeaturePayload{}, errors.New("Could not instantiate feature payload: " + err.Error())
+		return &FeaturePayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not instantiate feature payload: "+err.Error())
 	}
 
 	return &FeaturePayload{

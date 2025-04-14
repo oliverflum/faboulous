@@ -24,11 +24,11 @@ func CheckFeatureExists(name string) bool {
 }
 
 // getFeatureByID retrieves a feature by ID and returns an error if not found
-func GetFeatureByID(id string) (*model.Feature, error) {
+func GetFeatureByID(id uint) (*model.Feature, *fiber.Error) {
 	var feature model.Feature
 	result := db.GetDB().First(&feature, "id = ?", id)
 	if result.Error != nil {
-		return nil, util.HandleGormError(result.Error)
+		return nil, util.HandleGormError(result)
 	}
 	return &feature, nil
 }

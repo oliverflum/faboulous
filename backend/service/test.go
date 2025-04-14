@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/internal/db"
+	"github.com/oliverflum/faboulous/backend/internal/util"
 	"github.com/oliverflum/faboulous/backend/model"
 	"gorm.io/gorm"
 )
@@ -17,7 +18,7 @@ func SendTestResponse(c *fiber.Ctx, test *model.Test, statusCode int) error {
 }
 
 // getTestByID retrieves a test by ID and returns an error if not found
-func GetTestByID(id uint, preloadVariants bool) (*model.Test, error) {
+func GetTestByID(id uint, preloadVariants bool) (*model.Test, *fiber.Error) {
 	var test model.Test
 	var result *gorm.DB
 	if preloadVariants {
@@ -27,7 +28,9 @@ func GetTestByID(id uint, preloadVariants bool) (*model.Test, error) {
 	} else {
 		result = db.GetDB().First(&test, id)
 	}
-	if result.RowsAffected == 0 {
+	if result.Error != nil {
+		return nil, util.HandleGormError(result)
+	} else if result.RowsAffected == 0 {
 		return nil, fiber.NewError(fiber.StatusNotFound, "Test not found")
 	}
 	return &test, nil
