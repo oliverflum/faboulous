@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "067e545c-7387-41a5-ab22-c8d027cdb6e3",
+		"_postman_id": "13ec3dac-49d0-4295-8232-56469f9e9473",
 		"name": "Faboulous API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "4071390"
@@ -21,7 +21,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"feature"
 							]
 						}
@@ -38,6 +38,15 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"Items Per Page\",\n    \"Value\": 24\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/api/admin/feature",
 							"host": [
@@ -45,7 +54,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"feature"
 							]
 						}
@@ -64,7 +73,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"Name\": \"TestFeature3\",\n    \"Value\": 5.5\n}",
+							"raw": "{\n    \"Name\": \"TestFeature3\",\n    \"Value\": 5.6\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -78,7 +87,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"feature",
 								"{{featureId}}"
 							]
@@ -109,7 +118,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
+											"raw": "{\n    \"Name\": \"Items Per Page\",\n    \"Value\": 16\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -117,16 +126,18 @@
 											}
 										},
 										"url": {
-											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant/{{variantId}}/variant_feature",
 											"host": [
 												"{{base_url}}"
 											],
 											"path": [
 												"api",
-												"config",
+												"admin",
 												"test",
 												"{{testId}}",
-												"variant"
+												"variant",
+												"{{variantId}}",
+												"feature"
 											]
 										}
 									},
@@ -135,7 +146,7 @@
 								{
 									"name": "Update Variant Feature",
 									"request": {
-										"method": "POST",
+										"method": "PUT",
 										"header": [
 											{
 												"key": "Content-Type",
@@ -152,22 +163,51 @@
 											}
 										},
 										"url": {
-											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant/{{variantId}}/variant_feature/{{vfId}}",
 											"host": [
 												"{{base_url}}"
 											],
 											"path": [
 												"api",
-												"config",
+												"admin",
 												"test",
 												"{{testId}}",
-												"variant"
+												"variant",
+												"{{variantId}}",
+												"feature",
+												"{{vfId}}"
 											]
 										}
 									},
 									"response": []
 								}
 							]
+						},
+						{
+							"name": "List Variants",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/test/{{testId}}/variant",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"test",
+										"{{testId}}",
+										"variant"
+									]
+								}
+							},
+							"response": []
 						},
 						{
 							"name": "Add Variant",
@@ -181,7 +221,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 18.0\n        }\n    ]\n}",
+									"raw": "{\n    \"name\": \"Biggest\",\n    \"size\": 30\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -195,7 +235,7 @@
 									],
 									"path": [
 										"api",
-										"config",
+										"admin",
 										"test",
 										"{{testId}}",
 										"variant"
@@ -216,7 +256,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"features\": [\n        {\n            \"name\": \"TestFeature3\",\n            \"value\": 10.0\n        },\n        {\n            \"name\": \"New Feature\",\n            \"value\": true\n        }\n    ]\n}",
+									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"size\": 50\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -224,25 +264,21 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/api/admin/test/:testId/variant/:id",
+									"raw": "{{base_url}}/api/admin/test/:testId/variant/{{variantId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"api",
-										"config",
+										"admin",
 										"test",
 										":testId",
 										"variant",
-										":id"
+										"{{variantId}}"
 									],
 									"variable": [
 										{
 											"key": "testId",
-											"value": "1"
-										},
-										{
-											"key": "id",
 											"value": "1"
 										}
 									]
@@ -251,7 +287,7 @@
 							"response": []
 						},
 						{
-							"name": "Update Variant Copy",
+							"name": "Delete Variant",
 							"request": {
 								"method": "DELETE",
 								"header": [
@@ -261,27 +297,17 @@
 									}
 								],
 								"url": {
-									"raw": "{{base_url}}/api/admin/test/:testId/variant/:id",
+									"raw": "{{base_url}}/api/admin/test/{{testId}}/variant/{{variantId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"api",
-										"config",
+										"admin",
 										"test",
-										":testId",
+										"{{testId}}",
 										"variant",
-										":id"
-									],
-									"variable": [
-										{
-											"key": "testId",
-											"value": "1"
-										},
-										{
-											"key": "id",
-											"value": "1"
-										}
+										"{{variantId}}"
 									]
 								}
 							},
@@ -301,7 +327,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"test"
 							]
 						}
@@ -320,7 +346,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"Name\": \"FEATURE MEATURE\",\n    \"Method\": \"RANDOM\"\n}",
+							"raw": "{\n    \"Name\": \"Page Size\",\n    \"Method\": \"RANDOM\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -334,7 +360,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"test"
 							]
 						}
@@ -351,6 +377,15 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"FEATURE MEATURE\",\n    \"Method\": \"RANDOM\",\n    \"Active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/api/admin/test/:id",
 							"host": [
@@ -358,7 +393,7 @@
 							],
 							"path": [
 								"api",
-								"config",
+								"admin",
 								"test",
 								":id"
 							],
@@ -371,8 +406,83 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Delete Test",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/test/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"test",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Test",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/test/{{testId}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"test",
+								"{{testId}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
+		},
+		{
+			"name": "Publish",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/publish",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"admin",
+						"publish"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [

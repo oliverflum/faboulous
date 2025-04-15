@@ -34,8 +34,8 @@ func GetTestByID(id uint, preloadVariants bool) (*model.Test, *fiber.Error) {
 	return &test, nil
 }
 
-func GetAllTests(preloadVariants bool) ([]model.Test, *fiber.Error) {
-	var tests []model.Test
+func GetAllTests(preloadVariants bool) ([]*model.Test, *fiber.Error) {
+	var tests []*model.Test
 	var result *gorm.DB
 	if preloadVariants {
 		result = db.GetDB().Preload("Variants").Find(&tests)

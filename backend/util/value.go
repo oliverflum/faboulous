@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,6 +23,13 @@ func GetValueTypeAndString(jsonValue any) (string, string, *fiber.Error) {
 	case int, int8, int16, int32, int64:
 		return INT, fmt.Sprintf("%d", v), nil
 	case float32, float64:
+		floatVal := v.(float64)
+		floored := math.Floor(floatVal)
+		diff := floatVal - floored
+		if diff == 0 {
+			intVal := int(floatVal)
+			return INT, fmt.Sprintf("%d", intVal), nil
+		}
 		return FLOAT, fmt.Sprintf("%f", v), nil
 	default:
 		return "", "", fiber.NewError(fiber.StatusBadRequest, "unsupported value type: "+fmt.Sprintf("%T", jsonValue))

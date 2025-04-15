@@ -69,6 +69,7 @@ func NewTestVariantPayload(variant Variant) (VariantPayload, error) {
 	return VariantPayload{
 		VariantWritePayload: VariantWritePayload{
 			Name: variant.Name,
+			Size: variant.Size,
 		},
 		Id: variant.ID,
 	}, nil

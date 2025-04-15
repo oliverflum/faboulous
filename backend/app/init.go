@@ -19,19 +19,21 @@ func SetupApp() *fiber.App {
 
 	api := app.Group("/api")
 
-	configApi := api.Group("/admin")
+	configApi := api.Group("/config")
+	configApi.Get("/", handler.GetConfig)
+	adminApi := api.Group("/admin")
 
 	// Add the publish route
-	configApi.Post("/publish", handler.Publish)
+	adminApi.Post("/publish", handler.Publish)
 
-	featureApi := configApi.Group("/feature")
+	featureApi := adminApi.Group("/feature")
 	featureApi.Get("/", handler.ListFeatures)
 	featureApi.Post("/", handler.AddFeature)
 	featureApi.Put("/:featureId", handler.UpdateFeature)
 	featureApi.Get("/:featureId", handler.GetFeature)
 	featureApi.Delete("/:featureId", handler.DeleteFeature)
 
-	testApi := configApi.Group("/test")
+	testApi := adminApi.Group("/test")
 	testApi.Get("/", handler.ListTests)
 	testApi.Post("/", handler.AddTest)
 	testApi.Put("/:testId", handler.UpdateTest)
@@ -44,7 +46,7 @@ func SetupApp() *fiber.App {
 	variantApi.Put("/:variantId", handler.UpdateVariant)
 	variantApi.Delete("/:variantId", handler.DeleteVariant)
 
-	variantFeatureApi := variantApi.Group(":variantId/feature")
+	variantFeatureApi := variantApi.Group(":variantId/variant_feature")
 	variantFeatureApi.Post("/", handler.AddVariantFeature)
 	variantFeatureApi.Put("/:variantFeatureId", handler.UpdateVariantFeature)
 	variantFeatureApi.Delete("/:variantFeatureId", handler.DeleteVariantFeature)

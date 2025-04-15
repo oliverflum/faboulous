@@ -20,7 +20,7 @@ func ListTests(c *fiber.Ctx) error {
 
 	testPayloads := make([]model.TestPayload, len(tests))
 	for i, test := range tests {
-		payload, err := model.NewTestPayload(&test)
+		payload, err := model.NewTestPayload(test)
 		if err != nil {
 			return err
 		}
