@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "13ec3dac-49d0-4295-8232-56469f9e9473",
+		"_postman_id": "2367e945-28e7-4a36-b799-107fe9e16cb5",
 		"name": "Faboulous API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "4071390"
@@ -118,7 +118,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"Name\": \"Items Per Page\",\n    \"Value\": 16\n}",
+											"raw": "{\n    \"feature_id\": 1,\n    \"value\": 28\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -137,7 +137,7 @@
 												"{{testId}}",
 												"variant",
 												"{{variantId}}",
-												"feature"
+												"variant_feature"
 											]
 										}
 									},
@@ -174,7 +174,7 @@
 												"{{testId}}",
 												"variant",
 												"{{variantId}}",
-												"feature",
+												"variant_feature",
 												"{{vfId}}"
 											]
 										}
@@ -221,7 +221,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Biggest\",\n    \"size\": 30\n}",
+									"raw": "{\n    \"name\": \"Smaller\",\n    \"size\": 20\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -256,7 +256,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"TEST A VERSION\",\n    \"size\": 50\n}",
+									"raw": "{\n    \"name\": \"Bigger\",\n    \"size\": 20\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -379,7 +379,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"Name\": \"FEATURE MEATURE\",\n    \"Method\": \"RANDOM\",\n    \"Active\": true\n}",
+							"raw": "{\n    \"Name\": \"Page Size\",\n    \"Method\": \"RANDOM\",\n    \"Active\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -479,6 +479,24 @@
 						"api",
 						"admin",
 						"publish"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Config",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/config",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"config"
 					]
 				}
 			},

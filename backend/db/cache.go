@@ -9,6 +9,7 @@ import (
 type FeatureInfoMap map[uint]*model.FeatureInfo
 type TestInfo struct {
 	Method         string
+	Name           string
 	FeatureInfoMap *FeatureInfoMap
 }
 type TestConfigMap map[uint]*TestInfo

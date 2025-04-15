@@ -47,6 +47,7 @@ func createTestConfigMap(tests []*model.Test, featureSet *model.FeatureSet) (*db
 		k := uint(0)
 		newTestConfigMap[test.ID] = &db.TestInfo{
 			Method:         test.Method,
+			Name:           test.Name,
 			FeatureInfoMap: &db.FeatureInfoMap{},
 		}
 		// Add variant feature sets

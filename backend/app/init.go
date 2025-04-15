@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/handler"
+	"github.com/oliverflum/faboulous/backend/service"
 	"github.com/oliverflum/faboulous/backend/util"
 )
 
@@ -16,6 +17,7 @@ func SetupApp() *fiber.App {
 	app.Use(logger.New())
 
 	db.InitDB()
+	service.PublishConfig()
 
 	api := app.Group("/api")
 
