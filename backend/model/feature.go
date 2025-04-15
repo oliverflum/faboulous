@@ -64,11 +64,13 @@ func NewFeaturePayload(feature *Feature) (*FeaturePayload, *fiber.Error) {
 	}, nil
 }
 
-type FeatureSet map[string]any
-
 type FeatureInfo struct {
-	VariantId   uint        `json:"variant_id"`
-	VariantName string      `json:"variant_name"`
-	VariantSize uint        `json:"variant_size"`
-	FeatureSet  *FeatureSet `json:"feature_set"`
+	VariantId   uint   `json:"variant_id"`
+	VariantName string `json:"variant_name"`
+	VariantSize uint   `json:"variant_size"`
+	TestId      uint   `json:"test_id"`
+	TestName    string `json:"test_name"`
+	Value       any    `json:"value"`
 }
+
+type FeatureSet map[string]FeatureInfo

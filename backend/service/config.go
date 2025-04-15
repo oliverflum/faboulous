@@ -10,16 +10,6 @@ import (
 	"github.com/oliverflum/faboulous/backend/model"
 )
 
-type FeatureInfoSetVal struct {
-	VariantId   uint   `json:"variant_id"`
-	VariantName string `json:"variant_name"`
-	VariantSize uint   `json:"variant_size"`
-	TestId      uint   `json:"test_id"`
-	TestName    string `json:"test_name"`
-	Value       any    `json:"value"`
-}
-type FeatureInfoSet map[string]*FeatureInfoSetVal
-
 func getFeatureInfoKey(differentiator string, method string) (uint, *fiber.Error) {
 	switch method {
 	case model.RANDOM:
@@ -35,10 +25,10 @@ func getFeatureInfoKey(differentiator string, method string) (uint, *fiber.Error
 	return 0, fiber.NewError(fiber.StatusInternalServerError, "Invalid method")
 }
 
-func GetFeatureSet(differentiator string) (FeatureInfoSet, *fiber.Error) {
+func GetFeatureSet(differentiator string) (*model.FeatureSet, *fiber.Error) {
 	testsConfigs := db.GetTestConfigs()
-	featureInfoSet := make(FeatureInfoSet)
-	for testId, testConfig := range testsConfigs {
+	globalFeatureSet := make(model.FeatureSet)
+	for _, testConfig := range testsConfigs {
 		if differentiator == "" && testConfig.Method != model.RANDOM {
 			continue
 		}
@@ -47,18 +37,10 @@ func GetFeatureSet(differentiator string) (FeatureInfoSet, *fiber.Error) {
 			return nil, err
 		}
 
-		featureInfo := (*testConfig.FeatureInfoMap)[featureInfoKey]
-		for featureName, featureVal := range *featureInfo.FeatureSet {
-			featureInfoSet[featureName] = &FeatureInfoSetVal{
-				VariantId:   featureInfo.VariantId,
-				VariantName: featureInfo.VariantName,
-				VariantSize: featureInfo.VariantSize,
-				TestId:      testId,
-				TestName:    testConfig.Name,
-				Value:       featureVal,
-			}
+		testFeatureSet := (*testConfig.FeatureSets)[featureInfoKey]
+		for featureName, featureInfo := range *testFeatureSet {
+			globalFeatureSet[featureName] = featureInfo
 		}
-		return featureInfoSet, nil
 	}
-	return featureInfoSet, nil
+	return &globalFeatureSet, nil
 }

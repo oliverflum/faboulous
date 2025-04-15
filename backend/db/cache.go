@@ -6,11 +6,12 @@ import (
 	"github.com/oliverflum/faboulous/backend/model"
 )
 
-type FeatureInfoMap map[uint]*model.FeatureInfo
+type FeatureSetMap map[uint]*model.FeatureSet
+
 type TestInfo struct {
-	Method         string
-	Name           string
-	FeatureInfoMap *FeatureInfoMap
+	Method      string
+	Name        string
+	FeatureSets *FeatureSetMap
 }
 type TestConfigMap map[uint]*TestInfo
 
