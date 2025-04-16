@@ -21,7 +21,7 @@ func ListFeatures(c *fiber.Ctx) error {
 	// Convert the features to FeaturePayload
 	featurePayloads := make([]*model.FeaturePayload, len(features))
 	for i, feature := range features {
-		featurePayload, err := model.NewFeaturePayload(feature)
+		featurePayload, err := service.NewFeaturePayload(feature)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
@@ -41,9 +41,9 @@ func AddFeature(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Feature with this name already exists")
 	}
 
-	feature, err := model.NewFeature(payload)
+	feature, err := service.NewFeature(payload)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		return c.Status(err.Code).SendString(err.Message)
 	}
 
 	result := db.GetDB().Create(&feature)
@@ -59,7 +59,7 @@ func GetFeature(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	feature, err := service.GetFeatureByID(ids["featureId"])
+	feature, err := service.FindFeatureByID(ids["featureId"])
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func DeleteFeature(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	feature, err := service.GetFeatureByID(ids["featureId"])
+	feature, err := service.FindFeatureByID(ids["featureId"])
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func UpdateFeature(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	feature, err := service.GetFeatureByID(ids["featureId"])
+	feature, err := service.FindFeatureByID(ids["featureId"])
 	if err != nil {
 		return err
 	}

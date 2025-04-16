@@ -20,7 +20,7 @@ func ListTests(c *fiber.Ctx) error {
 
 	testPayloads := make([]model.TestPayload, len(tests))
 	for i, test := range tests {
-		payload, err := model.NewTestPayload(test)
+		payload, err := service.NewTestPayload(test)
 		if err != nil {
 			return err
 		}
@@ -41,7 +41,7 @@ func AddTest(c *fiber.Ctx) error {
 		return err
 	}
 
-	test := model.NewTest(payload)
+	test := service.NewTest(payload)
 	result := db.GetDB().Create(&test)
 	if result.Error != nil {
 		return util.HandleGormError(result)
@@ -55,7 +55,7 @@ func GetTest(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	test, err := service.GetTestByID(ids["testId"], true)
+	test, err := service.FindTestByID(ids["testId"], true)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func DeleteTest(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	test, err := service.GetTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func UpdateTest(c *fiber.Ctx) error {
 		return err
 	}
 
-	test, err := service.GetTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}

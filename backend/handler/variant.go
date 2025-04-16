@@ -24,7 +24,7 @@ func ListVariants(c *fiber.Ctx) error {
 
 	variantPayloads := make([]model.VariantPayload, len(variants))
 	for i, variant := range variants {
-		payload, err := model.NewVariantPayload(variant, db.GetDB())
+		payload, err := service.NewVariantPayload(variant, db.GetDB())
 		if err != nil {
 			return err
 		}
@@ -48,7 +48,7 @@ func AddVariant(c *fiber.Ctx) error {
 	}
 
 	// Check if test exists
-	test, err := service.GetTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func AddVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	variant := model.NewVariant(*payload)
+	variant := service.NewVariant(*payload)
 	variant.TestID = test.ID
 	result := db.GetDB().Create(&variant)
 
@@ -84,12 +84,12 @@ func UpdateVariant(c *fiber.Ctx) error {
 		return c.Status(valErr.Code).SendString(valErr.Message)
 	}
 
-	variant, err := service.GetVariant(ids["variantId"], false)
+	variant, err := service.FindVariantById(ids["variantId"], false)
 	if err != nil {
 		return err
 	}
 
-	test, err := service.GetTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], false)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func DeleteVariant(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID")
 	}
 
-	variant, err := service.GetVariant(ids["variantId"], false)
+	variant, err := service.FindVariantById(ids["variantId"], false)
 	if err != nil {
 		return err
 	}

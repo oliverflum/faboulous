@@ -6,7 +6,7 @@ import (
 	"github.com/oliverflum/faboulous/backend/model"
 )
 
-func CheckEntities(testID uint, variantID uint, featureId uint) (*model.Variant, *model.Feature, *model.VariantFeature, *fiber.Error) {
+func RetrieveEntities(testID uint, variantID uint, featureId uint) (*model.Variant, *model.Feature, *model.VariantFeature, *fiber.Error) {
 	var variant model.Variant
 	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
 	if result.Error != nil {
@@ -28,7 +28,18 @@ func CheckEntities(testID uint, variantID uint, featureId uint) (*model.Variant,
 	return &variant, &feature, &variantFeature, nil
 }
 
-func GetVariantFeaturePayload(variantFeature *model.VariantFeature) *model.FeaturePayload {
+func IsFeatureIsUsedInAnotherTest(featureId uint, testId uint) *fiber.Error {
+	inner := db.GetDB().Model(&model.VariantFeature{}).Select("variants.test_id").Joins("left join variants on variant_features.variant_id = variants.id").Where("feature_id = ?", featureId)
+	result := db.GetDB().Model(&model.Test{}).Joins("join (?) i on tests.id = i.test_id", inner).Where("tests.id != ?", testId).Scan(&model.Test{})
+	if result.Error != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to check if feature availability")
+	} else if result.RowsAffected > 0 {
+		return fiber.NewError(fiber.StatusBadRequest, "Feature is already used in another test")
+	}
+	return nil
+}
+
+func NewVariantFeaturePayload(variantFeature *model.VariantFeature) *model.FeaturePayload {
 	return &model.FeaturePayload{
 		Id: variantFeature.ID,
 		FeatureWritePayload: model.FeatureWritePayload{

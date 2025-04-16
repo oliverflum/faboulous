@@ -10,17 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// sendVariantResponse handles the common logic for sending variant responses
 func SendVariantResponse(c *fiber.Ctx, variant model.Variant, statusCode int) error {
-	payload, err := model.NewVariantPayload(variant, db.GetDB())
+	payload, err := NewVariantPayload(variant, db.GetDB())
 	if err != nil {
 		return err
 	}
 	return c.Status(statusCode).JSON(payload)
 }
 
-// getVariantByID retrieves a variant by ID and test ID, returns an error if not found
-func GetVariant(variantID uint, preloadFeatures bool) (*model.Variant, *fiber.Error) {
+func FindVariantById(variantID uint, preloadFeatures bool) (*model.Variant, *fiber.Error) {
 	var variant model.Variant
 	var result *gorm.DB
 	if preloadFeatures {
@@ -76,7 +74,6 @@ func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.V
 		biggestVariantSize = variantSize
 	}
 
-	// Check constraints based on test settings
 	if test.CollapseControlVariants {
 		if newSize > 100-biggestVariantSize {
 			return fiber.NewError(fiber.StatusBadRequest,
@@ -91,4 +88,49 @@ func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.V
 	}
 
 	return nil
+}
+
+func NewVariant(payload model.VariantWritePayload) model.Variant {
+	return model.Variant{
+		Name:     payload.Name,
+		Size:     payload.Size,
+		Features: make([]model.Feature, 0),
+	}
+}
+
+func NewVariantPayload(variant model.Variant, db *gorm.DB) (model.VariantPayload, error) {
+	features := make([]model.FeaturePayload, len(variant.Features))
+	for i, feature := range variant.Features {
+		variantFeature := &model.VariantFeature{}
+		res := db.First(variantFeature, "variant_id = ? AND feature_id = ?", variant.ID, feature.ID)
+		if res.Error != nil {
+			return model.VariantPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Feature not linked to variant")
+		}
+		payload := model.FeaturePayload{
+			Id: variantFeature.ID,
+			FeatureWritePayload: model.FeatureWritePayload{
+				Name:  feature.Name,
+				Value: variantFeature.Value,
+			},
+		}
+		features[i] = payload
+	}
+	return model.VariantPayload{
+		VariantWritePayload: model.VariantWritePayload{
+			Name: variant.Name,
+			Size: variant.Size,
+		},
+		Id:       variant.ID,
+		Features: features,
+	}, nil
+}
+
+func NewTestVariantPayload(variant model.Variant) (model.VariantPayload, error) {
+	return model.VariantPayload{
+		VariantWritePayload: model.VariantWritePayload{
+			Name: variant.Name,
+			Size: variant.Size,
+		},
+		Id: variant.ID,
+	}, nil
 }

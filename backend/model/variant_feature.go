@@ -10,8 +10,8 @@ type VariantFeature struct {
 	gorm.Model
 	FeatureID uint    `gorm:"primaryKey"`
 	VariantID uint    `gorm:"primaryKey"`
-	Feature   Feature `gorm:"foreignKey:FeatureID"`
-	Variant   Variant `gorm:"foreignKey:VariantID"`
+	Feature   Feature `gorm:"foreignKey:FeatureID;constraint:OnDelete:CASCADE"`
+	Variant   Variant `gorm:"foreignKey:VariantID;constraint:OnDelete:CASCADE"`
 	Value     string
 }
 

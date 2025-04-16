@@ -20,13 +20,18 @@ func AddVariantFeature(c *fiber.Ctx) error {
 		return valErr
 	}
 
-	variant, feature, existingVariantFeature, checkErr := service.CheckEntities(ids["testId"], ids["variantId"], payload.FeatureId)
+	variant, feature, existingVariantFeature, checkErr := service.RetrieveEntities(ids["testId"], ids["variantId"], payload.FeatureId)
 	if checkErr != nil {
 		return checkErr
 	}
 
 	if existingVariantFeature != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Variant feature already exists")
+	}
+
+	err = service.IsFeatureIsUsedInAnotherTest(feature.ID, ids["testId"])
+	if err != nil {
+		return err
 	}
 
 	valueType, stringValue, err := util.GetValueTypeAndString(payload.Value)
@@ -54,7 +59,7 @@ func AddVariantFeature(c *fiber.Ctx) error {
 		return util.HandleGormError(result)
 	}
 
-	resBody := service.GetVariantFeaturePayload(updatedVariantFeature)
+	resBody := service.NewVariantFeaturePayload(updatedVariantFeature)
 
 	return c.Status(fiber.StatusCreated).JSON(resBody)
 }
@@ -71,7 +76,7 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 		return valErr
 	}
 
-	_, _, variantFeature, checkErr := service.CheckEntities(ids["testId"], ids["variantId"], payload.FeatureId)
+	_, _, variantFeature, checkErr := service.RetrieveEntities(ids["testId"], ids["variantId"], payload.FeatureId)
 	if checkErr != nil {
 		return checkErr
 	}
@@ -89,7 +94,7 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 		return util.HandleGormError(result)
 	}
 
-	resBody := service.GetVariantFeaturePayload(variantFeature)
+	resBody := service.NewVariantFeaturePayload(variantFeature)
 
 	return c.Status(fiber.StatusOK).JSON(resBody)
 }

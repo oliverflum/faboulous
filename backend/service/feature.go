@@ -9,7 +9,7 @@ import (
 
 // sendFeatureResponse handles the common logic for sending feature responses
 func SendFeatureResponse(c *fiber.Ctx, feature *model.Feature, statusCode int) error {
-	featurePayload, err := model.NewFeaturePayload(feature)
+	featurePayload, err := NewFeaturePayload(feature)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -24,7 +24,7 @@ func CheckFeatureExists(name string) bool {
 }
 
 // getFeatureByID retrieves a feature by ID and returns an error if not found
-func GetFeatureByID(id uint) (*model.Feature, *fiber.Error) {
+func FindFeatureByID(id uint) (*model.Feature, *fiber.Error) {
 	var feature model.Feature
 	result := db.GetDB().First(&feature, "id = ?", id)
 	if result.Error != nil {
@@ -40,4 +40,32 @@ func GetAllFeatures() ([]*model.Feature, *fiber.Error) {
 		return nil, util.HandleGormError(result)
 	}
 	return features, nil
+}
+
+func NewFeaturePayload(feature *model.Feature) (*model.FeaturePayload, *fiber.Error) {
+	value, err := util.GetJsonValue(feature.DefaultValue, feature.Type)
+
+	if err != nil {
+		return &model.FeaturePayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not instantiate feature payload: "+err.Error())
+	}
+
+	return &model.FeaturePayload{
+		Id: feature.ID,
+		FeatureWritePayload: model.FeatureWritePayload{
+			Name:  feature.Name,
+			Value: value,
+		},
+	}, nil
+}
+
+func NewFeature(feature *model.FeatureWritePayload) (*model.Feature, *fiber.Error) {
+	valueType, defaultValue, err := util.GetValueTypeAndString(feature.Value)
+	if err != nil {
+		return &model.Feature{}, fiber.NewError(fiber.StatusInternalServerError, "Could not instantiate feature entity: "+err.Error())
+	}
+	return &model.Feature{
+		Name:         feature.Name,
+		Type:         valueType,
+		DefaultValue: defaultValue,
+	}, nil
 }

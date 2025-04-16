@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var dbConnection *gorm.DB
@@ -19,14 +20,14 @@ const portEnvVar = "FAB_DB_PORT"
 const dbNameVar = "FAB_DB_DB_NAME"
 const dbTypeVar = "FAB_DB_TYPE"
 
-func InitSqliteDB(inMemory bool) *gorm.DB {
+func InitSqliteDB(inMemory bool, gormConfig *gorm.Config) *gorm.DB {
 	var db *gorm.DB
 	var err error
 
 	if inMemory {
-		db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+		db, err = gorm.Open(sqlite.Open(":memory:"), gormConfig)
 	} else {
-		db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+		db, err = gorm.Open(sqlite.Open("test.db"), gormConfig)
 	}
 
 	if err != nil {
@@ -35,7 +36,7 @@ func InitSqliteDB(inMemory bool) *gorm.DB {
 	return db
 }
 
-func InitMysqlDB() *gorm.DB {
+func InitMysqlDB(gormConfig *gorm.Config) *gorm.DB {
 	envVarNames := []string{
 		userNameEnvVar,
 		psswdEnvVar,
@@ -52,7 +53,7 @@ func InitMysqlDB() *gorm.DB {
 		envVarVals[portEnvVar],
 		envVarVals[dbNameVar],
 	)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
 	if err != nil {
 		panic("Failed to connect database")
 	}
@@ -64,13 +65,16 @@ func InitDB() *gorm.DB {
 		dbTypeVar,
 	}
 	dbType := util.ReadEnvVars(envTypeVarNameArr)[dbTypeVar]
+	gormConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(util.GetLogLevelGorm()),
+	}
 	var db *gorm.DB
 	if dbType == "sqlite" {
-		db = InitSqliteDB(false)
+		db = InitSqliteDB(false, gormConfig)
 	} else if dbType == "mysql" {
-		db = InitMysqlDB()
+		db = InitMysqlDB(gormConfig)
 	} else if dbType == "memory" {
-		db = InitSqliteDB(true)
+		db = InitSqliteDB(true, gormConfig)
 	} else {
 		panic("Invalid database type. Supported types are: sqlite, mysql, memory")
 	}

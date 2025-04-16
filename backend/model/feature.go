@@ -1,9 +1,6 @@
 package model
 
 import (
-	"errors"
-
-	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/util"
 	"gorm.io/gorm"
 )
@@ -26,18 +23,6 @@ func (feature *Feature) UpdateFromPayload(payload *FeatureWritePayload) error {
 	return nil
 }
 
-func NewFeature(feature *FeatureWritePayload) (*Feature, error) {
-	valueType, defaultValue, err := util.GetValueTypeAndString(feature.Value)
-	if err != nil {
-		return &Feature{}, errors.New("Could not instantiate feature entity: " + err.Error())
-	}
-	return &Feature{
-		Name:         feature.Name,
-		Type:         valueType,
-		DefaultValue: defaultValue,
-	}, nil
-}
-
 type FeaturePayload struct {
 	Id uint `json:"id"`
 	FeatureWritePayload
@@ -46,22 +31,6 @@ type FeaturePayload struct {
 type FeatureWritePayload struct {
 	Name  string `json:"name" validate:"required"`
 	Value any    `json:"value" validate:"required"`
-}
-
-func NewFeaturePayload(feature *Feature) (*FeaturePayload, *fiber.Error) {
-	value, err := util.GetJsonValue(feature.DefaultValue, feature.Type)
-
-	if err != nil {
-		return &FeaturePayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not instantiate feature payload: "+err.Error())
-	}
-
-	return &FeaturePayload{
-		Id: feature.ID,
-		FeatureWritePayload: FeatureWritePayload{
-			Name:  feature.Name,
-			Value: value,
-		},
-	}, nil
 }
 
 type FeatureInfo struct {

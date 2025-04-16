@@ -9,14 +9,14 @@ import (
 )
 
 func SendTestResponse(c *fiber.Ctx, test *model.Test, statusCode int) error {
-	payload, err := model.NewTestPayload(test)
+	payload, err := NewTestPayload(test)
 	if err != nil {
 		return err
 	}
 	return c.Status(statusCode).JSON(payload)
 }
 
-func GetTestByID(id uint, preloadVariants bool) (*model.Test, *fiber.Error) {
+func FindTestByID(id uint, preloadVariants bool) (*model.Test, *fiber.Error) {
 	var test model.Test
 	var result *gorm.DB
 	if preloadVariants {
@@ -62,4 +62,35 @@ func CheckIfMethodAllowed(testMethod string) *fiber.Error {
 		return nil
 	}
 	return nil
+}
+
+func NewTest(payload *model.TestWritePayload) model.Test {
+	return model.Test{
+		Name:                    payload.Name,
+		Active:                  payload.Active,
+		Method:                  payload.Method,
+		CollapseControlVariants: payload.CollapseControlVariants,
+		Variants:                make([]model.Variant, 0),
+	}
+}
+
+func NewTestPayload(test *model.Test) (model.TestPayload, *fiber.Error) {
+	variants := make([]model.VariantPayload, len(test.Variants))
+	for i, variant := range test.Variants {
+		payload, err := NewTestVariantPayload(variant)
+		if err != nil {
+			return model.TestPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not convert variant entity to payload: "+err.Error())
+		}
+		variants[i] = payload
+	}
+	return model.TestPayload{
+		TestWritePayload: model.TestWritePayload{
+			Name:                    test.Name,
+			Active:                  test.Active,
+			Method:                  test.Method,
+			CollapseControlVariants: test.CollapseControlVariants,
+		},
+		Id:       test.ID,
+		Variants: variants,
+	}, nil
 }

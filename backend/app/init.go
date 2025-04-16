@@ -13,7 +13,7 @@ import (
 func SetupApp() *fiber.App {
 	app := fiber.New()
 
-	log.SetLevel(util.GetLogLevel())
+	log.SetLevel(util.GetLogLevelFiber())
 	app.Use(logger.New())
 
 	db.InitDB()

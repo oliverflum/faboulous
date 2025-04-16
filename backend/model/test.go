@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +18,7 @@ type Test struct {
 	Active                  bool      `gorm:"default:false"`
 	Method                  string    `gorm:"not null"`
 	CollapseControlVariants bool      `gorm:"default:true"`
-	Variants                []Variant `gorm:"foreignKey:TestID"`
+	Variants                []Variant `gorm:"foreignKey:TestID;constraint:OnDelete:CASCADE"`
 }
 
 func (t *Test) UpdateFromPayload(payload *TestWritePayload) error {
@@ -42,16 +41,6 @@ func (t *Test) AppendVariants(db *gorm.DB, payload *TestPayload) error {
 	return nil
 }
 
-func NewTest(payload *TestWritePayload) Test {
-	return Test{
-		Name:                    payload.Name,
-		Active:                  payload.Active,
-		Method:                  payload.Method,
-		CollapseControlVariants: payload.CollapseControlVariants,
-		Variants:                make([]Variant, 0),
-	}
-}
-
 type TestWritePayload struct {
 	Name                    string `json:"name" validate:"required"`
 	Active                  bool   `json:"active"`
@@ -62,25 +51,4 @@ type TestPayload struct {
 	TestWritePayload
 	Id       uint             `json:"id"`
 	Variants []VariantPayload `json:"variants,omitempty"`
-}
-
-func NewTestPayload(test *Test) (TestPayload, *fiber.Error) {
-	variants := make([]VariantPayload, len(test.Variants))
-	for i, variant := range test.Variants {
-		payload, err := NewTestVariantPayload(variant)
-		if err != nil {
-			return TestPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Could not convert variant entity to payload: "+err.Error())
-		}
-		variants[i] = payload
-	}
-	return TestPayload{
-		TestWritePayload: TestWritePayload{
-			Name:                    test.Name,
-			Active:                  test.Active,
-			Method:                  test.Method,
-			CollapseControlVariants: test.CollapseControlVariants,
-		},
-		Id:       test.ID,
-		Variants: variants,
-	}, nil
 }
