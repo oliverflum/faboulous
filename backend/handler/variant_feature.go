@@ -48,7 +48,13 @@ func AddVariantFeature(c *fiber.Ctx) error {
 		return util.HandleGormError(result)
 	}
 
-	resBody := service.GetVariantFeaturePayload(&variantFeature)
+	updatedVariantFeature := &model.VariantFeature{}
+	result := db.GetDB().Preload("Feature").First(&updatedVariantFeature, variantFeature.ID)
+	if result.Error != nil {
+		return util.HandleGormError(result)
+	}
+
+	resBody := service.GetVariantFeaturePayload(updatedVariantFeature)
 
 	return c.Status(fiber.StatusCreated).JSON(resBody)
 }
@@ -83,13 +89,9 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 		return util.HandleGormError(result)
 	}
 
-	featurePayload, err := model.NewFeaturePayload(&variantFeature.Feature)
-	if err != nil {
-		return err
-	}
-	featurePayload.Value = payload.Value
+	resBody := service.GetVariantFeaturePayload(variantFeature)
 
-	return c.Status(fiber.StatusOK).JSON(featurePayload)
+	return c.Status(fiber.StatusOK).JSON(resBody)
 }
 
 func DeleteVariantFeature(c *fiber.Ctx) error {
@@ -100,12 +102,12 @@ func DeleteVariantFeature(c *fiber.Ctx) error {
 
 	// Check if entities exist using gorm find
 	var variantFeature model.VariantFeature
-	result := db.GetDB().Where("id = ?", ids["id"]).First(&variantFeature)
+	result := db.GetDB().Where("id = ?", ids["variantFeatureId"]).First(&variantFeature)
 	if result.Error != nil {
 		return util.HandleGormError(result)
 	}
 
-	result = db.GetDB().Delete(&variantFeature)
+	result = db.GetDB().Unscoped().Delete(&variantFeature)
 	if result.Error != nil {
 		return util.HandleGormError(result)
 	}

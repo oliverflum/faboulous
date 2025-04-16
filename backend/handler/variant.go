@@ -119,7 +119,7 @@ func DeleteVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	result := db.GetDB().Delete(variant)
+	result := db.GetDB().Unscoped().Delete(variant)
 	if result.Error != nil {
 		return util.HandleGormError(result)
 	}

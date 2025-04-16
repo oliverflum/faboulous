@@ -73,7 +73,7 @@ func DeleteTest(c *fiber.Ctx) error {
 		return err
 	}
 
-	result := db.GetDB().Delete(test)
+	result := db.GetDB().Unscoped().Delete(test)
 	if result.Error != nil {
 		return util.HandleGormError(result)
 	}

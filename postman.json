@@ -118,7 +118,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"feature_id\": 1,\n    \"value\": 28\n}",
+											"raw": "{\n    \"feature_id\": 1,\n    \"value\": 24\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -147,6 +147,44 @@
 									"name": "Update Variant Feature",
 									"request": {
 										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"feature_id\": 1,\n    \"value\": 26\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/api/admin/test/{{testId}}/variant/{{variantId}}/variant_feature/{{vfId}}",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"admin",
+												"test",
+												"{{testId}}",
+												"variant",
+												"{{variantId}}",
+												"variant_feature",
+												"{{vfId}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Update Variant Feature Copy",
+									"request": {
+										"method": "DELETE",
 										"header": [
 											{
 												"key": "Content-Type",
@@ -387,7 +425,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/admin/test/:id",
+							"raw": "{{base_url}}/api/admin/test/{{testId}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -395,13 +433,7 @@
 								"api",
 								"admin",
 								"test",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
+								"{{testId}}"
 							]
 						}
 					},
@@ -418,7 +450,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/admin/test/:id",
+							"raw": "{{base_url}}/api/admin/test/{{testId}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -426,13 +458,7 @@
 								"api",
 								"admin",
 								"test",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
+								"{{testId}}"
 							]
 						}
 					},

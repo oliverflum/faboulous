@@ -77,7 +77,7 @@ func DeleteFeature(c *fiber.Ctx) error {
 		return err
 	}
 
-	result := db.GetDB().Delete(feature)
+	result := db.GetDB().Unscoped().Delete(feature)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(result.Error.Error())
 	}
