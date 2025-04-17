@@ -4,11 +4,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/oliverflum/faboulous/backend/db"
 	"github.com/oliverflum/faboulous/backend/model"
+	"github.com/oliverflum/faboulous/backend/util"
 )
 
-func RetrieveEntities(testID uint, variantID uint, featureId uint) (*model.Variant, *model.Feature, *model.VariantFeature, *fiber.Error) {
+func RetrieveRelatedEntities(testID uint, variantID uint, featureId uint) (*model.Variant, *model.Feature, *model.VariantFeature, *fiber.Error) {
 	var variant model.Variant
-	result := db.GetDB().Where("id = ? AND test_id = ?", variantID, testID).First(&variant)
+	result := db.GetDB().First(&variant, variantID)
 	if result.Error != nil {
 		return nil, nil, nil, fiber.NewError(fiber.StatusNotFound, "Variant not found")
 	}
@@ -28,7 +29,7 @@ func RetrieveEntities(testID uint, variantID uint, featureId uint) (*model.Varia
 	return &variant, &feature, &variantFeature, nil
 }
 
-func IsFeatureIsUsedInAnotherTest(featureId uint, testId uint) *fiber.Error {
+func CheckFeatureUsedInAnotherTest(featureId uint, testId uint) *fiber.Error {
 	inner := db.GetDB().Model(&model.VariantFeature{}).Select("variants.test_id").Joins("left join variants on variant_features.variant_id = variants.id").Where("feature_id = ?", featureId)
 	result := db.GetDB().Model(&model.Test{}).Joins("join (?) i on tests.id = i.test_id", inner).Where("tests.id != ?", testId).Scan(&model.Test{})
 	if result.Error != nil {
@@ -39,12 +40,16 @@ func IsFeatureIsUsedInAnotherTest(featureId uint, testId uint) *fiber.Error {
 	return nil
 }
 
-func NewVariantFeaturePayload(variantFeature *model.VariantFeature) *model.FeaturePayload {
-	return &model.FeaturePayload{
-		Id: variantFeature.ID,
-		FeatureWritePayload: model.FeatureWritePayload{
-			Name:  variantFeature.Feature.Name,
-			Value: variantFeature.Value,
-		},
+func NewVariantFeaturePayload(variantFeature *model.VariantFeature) (*model.VariantFeaturePayload, *fiber.Error) {
+	value, err := util.GetJsonValue(variantFeature.Value, variantFeature.Feature.Type)
+	if err != nil {
+		return nil, err
 	}
+	return &model.VariantFeaturePayload{
+		FeatureName: variantFeature.Feature.Name,
+		VariantName: variantFeature.Variant.Name,
+		VariantFeatureWritePayload: model.VariantFeatureWritePayload{
+			Value: value,
+		},
+	}, nil
 }

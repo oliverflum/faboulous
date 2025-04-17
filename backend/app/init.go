@@ -48,10 +48,9 @@ func SetupApp() *fiber.App {
 	variantApi.Put("/:variantId", handler.UpdateVariant)
 	variantApi.Delete("/:variantId", handler.DeleteVariant)
 
-	variantFeatureApi := variantApi.Group(":variantId/variant_feature")
-	variantFeatureApi.Post("/", handler.AddVariantFeature)
-	variantFeatureApi.Put("/:variantFeatureId", handler.UpdateVariantFeature)
-	variantFeatureApi.Delete("/:variantFeatureId", handler.DeleteVariantFeature)
+	variantFeatureApi := variantApi.Group(":variantId/feature")
+	variantFeatureApi.Put("/:featureId", handler.SetVariantFeature)
+	variantFeatureApi.Delete("/:featureId", handler.DeleteVariantFeature)
 
 	return app
 }

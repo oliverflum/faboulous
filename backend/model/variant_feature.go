@@ -21,8 +21,8 @@ func (variantFeature *VariantFeature) SetValue(value any) *fiber.Error {
 		return err
 	}
 
-	if variantFeature.Feature.ID == 0 || variantFeature.Feature.Type != valueType {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid feature or value type")
+	if variantFeature.Feature.Type != valueType {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid value type")
 	}
 	variantFeature.Value = stringValue
 	return nil
@@ -40,6 +40,11 @@ func (variantFeature *VariantFeature) GetValue() (any, *fiber.Error) {
 }
 
 type VariantFeatureWritePayload struct {
-	FeatureId uint `json:"feature_id" validate:"required"`
-	Value     any  `json:"value" validate:"required"`
+	Value any `json:"value" validate:"required"`
+}
+
+type VariantFeaturePayload struct {
+	VariantFeatureWritePayload
+	FeatureName string `json:"feature_name"`
+	VariantName string `json:"variant_name"`
 }

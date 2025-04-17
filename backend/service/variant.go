@@ -76,13 +76,17 @@ func CheckVariantSizeConstraints(db *gorm.DB, test *model.Test, variant *model.V
 
 	if test.CollapseControlVariants {
 		if newSize > 100-biggestVariantSize {
-			return fiber.NewError(fiber.StatusBadRequest,
-				fmt.Sprintf("Total size of all variants (%d) exceeds available space after control variant allocation (%d)",
-					newSize, 100-biggestVariantSize))
+			return fiber.NewError(
+				fiber.StatusBadRequest,
+				fmt.Sprintf(
+					"Total size of all variants (%d) exceeds available space after control variant allocation (%d)",
+					newSize, 100-biggestVariantSize),
+			)
 		}
 	} else {
 		if newSize*2 > 100 {
-			return fiber.NewError(fiber.StatusBadRequest,
+			return fiber.NewError(
+				fiber.StatusBadRequest,
 				fmt.Sprintf("Total size of all variants and their controls (%d) exceeds 100%%", newSize*2))
 		}
 	}
@@ -107,7 +111,7 @@ func NewVariantPayload(variant model.Variant, db *gorm.DB) (model.VariantPayload
 			return model.VariantPayload{}, fiber.NewError(fiber.StatusInternalServerError, "Feature not linked to variant")
 		}
 		payload := model.FeaturePayload{
-			Id: variantFeature.ID,
+			Id: feature.ID,
 			FeatureWritePayload: model.FeatureWritePayload{
 				Name:  feature.Name,
 				Value: variantFeature.Value,

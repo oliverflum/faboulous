@@ -48,7 +48,7 @@ func AddVariant(c *fiber.Ctx) error {
 	}
 
 	// Check if test exists
-	test, err := service.FindTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], true)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func UpdateVariant(c *fiber.Ctx) error {
 		return err
 	}
 
-	test, err := service.FindTestByID(ids["testId"], false)
+	test, err := service.FindTestByID(ids["testId"], true)
 	if err != nil {
 		return err
 	}

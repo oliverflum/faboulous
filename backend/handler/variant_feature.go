@@ -8,8 +8,8 @@ import (
 	"github.com/oliverflum/faboulous/backend/util"
 )
 
-func AddVariantFeature(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId"})
+func SetVariantFeature(c *fiber.Ctx) error {
+	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "featureId"})
 	if err != nil {
 		return err
 	}
@@ -20,69 +20,23 @@ func AddVariantFeature(c *fiber.Ctx) error {
 		return valErr
 	}
 
-	variant, feature, existingVariantFeature, checkErr := service.RetrieveEntities(ids["testId"], ids["variantId"], payload.FeatureId)
-	if checkErr != nil {
-		return checkErr
-	}
-
-	if existingVariantFeature != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Variant feature already exists")
-	}
-
-	err = service.IsFeatureIsUsedInAnotherTest(feature.ID, ids["testId"])
+	err = service.CheckFeatureUsedInAnotherTest(ids["featureId"], ids["testId"])
 	if err != nil {
 		return err
 	}
 
-	valueType, stringValue, err := util.GetValueTypeAndString(payload.Value)
-	if err != nil {
-		return err
-	}
-
-	if feature.Type != valueType {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid value type for feature "+feature.Name)
-	}
-
-	variantFeature := model.VariantFeature{
-		VariantID: variant.ID,
-		FeatureID: feature.ID,
-		Value:     stringValue,
-	}
-
-	if result := db.GetDB().Create(&variantFeature); result.Error != nil {
-		return util.HandleGormError(result)
-	}
-
-	updatedVariantFeature := &model.VariantFeature{}
-	result := db.GetDB().Preload("Feature").First(&updatedVariantFeature, variantFeature.ID)
-	if result.Error != nil {
-		return util.HandleGormError(result)
-	}
-
-	resBody := service.NewVariantFeaturePayload(updatedVariantFeature)
-
-	return c.Status(fiber.StatusCreated).JSON(resBody)
-}
-
-func UpdateVariantFeature(c *fiber.Ctx) error {
-	ids, err := util.ReadIdsFromParams(c, []string{"testId", "variantId", "variantFeatureId"})
-	if err != nil {
-		return err
-	}
-
-	payload := &model.VariantFeatureWritePayload{}
-	valErr := util.ParseAndValidatePayload(c, payload)
-	if valErr != nil {
-		return valErr
-	}
-
-	_, _, variantFeature, checkErr := service.RetrieveEntities(ids["testId"], ids["variantId"], payload.FeatureId)
+	variant, feature, variantFeature, checkErr := service.RetrieveRelatedEntities(ids["testId"], ids["variantId"], ids["featureId"])
 	if checkErr != nil {
 		return checkErr
 	}
 
 	if variantFeature == nil {
-		return fiber.NewError(fiber.StatusNotFound, "Variant feature not found")
+		variantFeature = &model.VariantFeature{
+			VariantID: variant.ID,
+			FeatureID: feature.ID,
+			Variant:   *variant,
+			Feature:   *feature,
+		}
 	}
 
 	if err := variantFeature.SetValue(payload.Value); err != nil {
@@ -94,7 +48,10 @@ func UpdateVariantFeature(c *fiber.Ctx) error {
 		return util.HandleGormError(result)
 	}
 
-	resBody := service.NewVariantFeaturePayload(variantFeature)
+	resBody, err := service.NewVariantFeaturePayload(variantFeature)
+	if err != nil {
+		return err
+	}
 
 	return c.Status(fiber.StatusOK).JSON(resBody)
 }
@@ -105,14 +62,14 @@ func DeleteVariantFeature(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid test ID or variant ID")
 	}
 
-	// Check if entities exist using gorm find
-	var variantFeature model.VariantFeature
-	result := db.GetDB().Where("id = ?", ids["variantFeatureId"]).First(&variantFeature)
-	if result.Error != nil {
-		return util.HandleGormError(result)
+	_, _, variantFeature, checkErr := service.RetrieveRelatedEntities(ids["testId"], ids["variantId"], ids["variantFeatureId"])
+	if checkErr != nil {
+		return checkErr
+	} else if variantFeature == nil {
+		return fiber.NewError(fiber.StatusNotFound, "Variant feature not found")
 	}
 
-	result = db.GetDB().Unscoped().Delete(&variantFeature)
+	result := db.GetDB().Unscoped().Delete(&variantFeature)
 	if result.Error != nil {
 		return util.HandleGormError(result)
 	}
