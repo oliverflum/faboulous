@@ -23,16 +23,18 @@ func createBaseFeatureSet(allFeatures []*model.Feature) *model.FeatureSet {
 }
 
 func updateFeatureSet(featureSet model.FeatureSet, variantId uint) (*model.FeatureSet, *fiber.Error) {
-	db := db.GetDB()
 	variant := &model.Variant{}
-	res := db.Preload("Features").Preload("Test").First(variant, variantId)
+	res := db.GetDB().Preload("Features").Preload("Test").First(variant, variantId)
 	if res.Error != nil {
 		return nil, util.HandleGormError(res)
 	}
-
+	updatedFeatureSet := make(model.FeatureSet)
+	for featureName, featureInfo := range featureSet {
+		updatedFeatureSet[featureName] = featureInfo
+	}
 	for _, vf := range variant.Features {
 		variantFeature := &model.VariantFeature{}
-		res := db.First(variantFeature, "variant_id = ? AND feature_id = ?", variant.ID, vf.ID)
+		res := db.GetDB().First(variantFeature, "variant_id = ? AND feature_id = ?", variant.ID, vf.ID)
 		if res.Error != nil {
 			return nil, util.HandleGormError(res)
 		}
@@ -40,7 +42,7 @@ func updateFeatureSet(featureSet model.FeatureSet, variantId uint) (*model.Featu
 		if err != nil {
 			return nil, err
 		}
-		featureSet[vf.Name] = model.FeatureInfo{
+		updatedFeatureSet[vf.Name] = model.FeatureInfo{
 			VariantId:   variant.ID,
 			VariantName: variant.Name,
 			VariantSize: variant.Size,
@@ -49,10 +51,10 @@ func updateFeatureSet(featureSet model.FeatureSet, variantId uint) (*model.Featu
 			Value:       value,
 		}
 	}
-	return &featureSet, nil
+	return &updatedFeatureSet, nil
 }
 
-func createTestConfigMap(tests []*model.Test, featureSet *model.FeatureSet) (*db.TestConfigMap, *fiber.Error) {
+func createTestConfigMap(tests []*model.Test, baseFeatureSet *model.FeatureSet) (*db.TestConfigMap, *fiber.Error) {
 	newTestConfigMap := make(db.TestConfigMap)
 	for _, test := range tests {
 		if !test.Active {
@@ -64,9 +66,9 @@ func createTestConfigMap(tests []*model.Test, featureSet *model.FeatureSet) (*db
 			Name:        test.Name,
 			FeatureSets: &db.FeatureSetMap{},
 		}
-		// Add variant feature sets
+
 		for _, variant := range test.Variants {
-			variantFeatureSet, err := updateFeatureSet(*featureSet, variant.ID)
+			variantFeatureSet, err := updateFeatureSet(*baseFeatureSet, variant.ID)
 			if err != nil {
 				return nil, err
 			}
@@ -75,12 +77,12 @@ func createTestConfigMap(tests []*model.Test, featureSet *model.FeatureSet) (*db
 			}
 			k += variant.Size
 		}
-		// Add base feature set
-		for _, featureInfo := range *featureSet {
+
+		for _, featureInfo := range *baseFeatureSet {
 			featureInfo.VariantSize = 100 - k
 		}
 		for i := k; i < 100; i++ {
-			(*newTestConfigMap[test.ID].FeatureSets)[i] = featureSet
+			(*newTestConfigMap[test.ID].FeatureSets)[i] = baseFeatureSet
 		}
 	}
 	return &newTestConfigMap, nil
